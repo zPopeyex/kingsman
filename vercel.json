@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "buildCommand": "pnpm -w install --frozen-lockfile && pnpm -F web build",
   "installCommand": "pnpm -w install --frozen-lockfile",
+  "buildCommand": "pnpm -w install --frozen-lockfile && pnpm -F web build",
   "framework": "vite",
   "outputDirectory": "apps/web/dist",
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
