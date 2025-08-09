@@ -1,0 +1,17 @@
+{
+  "name": "kingsman-barber",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "functions"
+  ],
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm --filter web build",
+    "emulate": "firebase emulators:start",
+    "deploy": "firebase deploy"
+  },
+  "devDependencies": {
+    "firebase-tools": "^14.12.0"
+  }
+}
