@@ -1,10 +1,26 @@
-function App() {
-  return (
-    <div className="min-h-screen bg-background text-center flex flex-col items-center justify-center">
-      <h1 className="font-display text-4xl text-primary mb-6">Kingsman Barber</h1>
-      <button className="bg-primary text-background px-6 py-3 rounded-2xl shadow hover:bg-primaryHover transition">Reservar</button>
-    </div>
-  )
-}
+import { Routes, Route } from "react-router-dom";
+import { Layout } from "@/components/Layout";
+import Home from "@/pages/Home";
+import Booking from "@/pages/Booking";
+import Shop from "@/pages/Shop";
+import Works from "@/pages/Works";
+import About from "@/pages/About";
+import Admin from "@/pages/Admin";
+import Profile from "@/pages/Profile";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
-export default App
+export default function App() {
+  return (
+    <Layout>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/citas" element={<Booking />} />
+        <Route path="/tienda" element={<Shop />} />
+        <Route path="/trabajos" element={<Works />} />
+        <Route path="/sobre-nosotros" element={<About />} />
+        <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+        <Route path="/perfil" element={<Profile />} />
+      </Routes>
+    </Layout>
+  );
+}

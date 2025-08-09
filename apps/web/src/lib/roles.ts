@@ -1,4 +1,5 @@
 export type Role = 'dev' | 'admin' | 'client'
+export const DEFAULT_ROLE: Role = 'client';
 
 export const permissions = [
   'view_home',
