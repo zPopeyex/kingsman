@@ -1,0 +1,8 @@
+node_modules
+.dist
+firebase-debug.log
+firestore-debug.log
+storage-debug.log
+functions/lib
+.env
+apps/web/dist
