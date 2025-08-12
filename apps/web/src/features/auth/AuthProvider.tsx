@@ -15,13 +15,7 @@ import {
 import { auth } from "@/lib/firebase"; // <-- tu auth inicializado
 import { db } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-
-type UserDoc = {
-  nickname?: string;
-  phone?: string;
-  photoURL?: string;
-  // agrega otros campos si los tienes
-};
+import type { UserDoc } from "@/types/user";
 
 type AuthState = {
   user: FirebaseUser | null;
@@ -48,8 +42,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
         const snap = await getDoc(ref);
         if (!snap.exists()) {
           const baseDoc: UserDoc = {
+            displayName: u.displayName ?? "",
             nickname: u.displayName ?? "",
             photoURL: u.photoURL ?? "",
+
+            createdAt: Date.now(), // o null si en el tipo es opcional
           };
           await setDoc(ref, baseDoc, { merge: true });
           setProfile(baseDoc);

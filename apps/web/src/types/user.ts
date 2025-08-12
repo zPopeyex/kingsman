@@ -5,7 +5,7 @@ export type UserDoc = {
   nickname?: string | null;
   phone?: string | null;
   photoURL: string | null;
-  role: Role;
+  role?: Role;
   createdAt: number; // Date.now()
   permissions?: string[];
 };
