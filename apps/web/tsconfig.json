@@ -3,7 +3,12 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "types": ["react", "react-dom"],
+    "moduleResolution": "bundler",
+    "skipLibCheck": true
   },
   "files": [],
   "references": [
