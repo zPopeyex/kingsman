@@ -1,33 +1,36 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import BottomNav from "@/components/BottomNav";
+import BottomNav from "./BottomNav";
 
-type Tab = "home" | "shop" | "promos" | "profile";
+type TabKey = "home" | "schedule" | "works" | "shop" | "profile";
 
-const pathToTab = (path: string): Tab => {
-  if (path.startsWith("/tienda")) return "shop";
-  if (path.startsWith("/trabajos")) return "promos";
-  if (path.startsWith("/perfil")) return "profile";
-  return "home";
-};
-
-const tabToPath: Record<Tab, string> = {
+const keyToPath: Record<TabKey, string> = {
   home: "/",
-  shop: "/tienda",
-  promos: "/trabajos",
-  profile: "/perfil",
+  schedule: "/citas",
+  works: "/trabajos",
+  shop: "/shop",
+  profile: "/profile",
 };
+
+function pathToKey(pathname: string): TabKey {
+  if (pathname.startsWith("/citas")) return "schedule";
+  if (pathname.startsWith("/trabajos")) return "works";
+  if (pathname.startsWith("/shop")) return "shop";
+  if (pathname.startsWith("/profile")) return "profile";
+  return "home";
+}
 
 export default function BottomNavAdapter() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
-  const value = pathToTab(pathname);
+  const value = pathToKey(pathname);
 
   return (
     <BottomNav
       value={value}
-      onChange={(t) => navigate(tabToPath[t])}
-      maxWidth={420} // puedes subir a 480 si quieres más ancho
+      onChange={(key) => {
+        navigate(keyToPath[key]);
+      }}
     />
   );
 }

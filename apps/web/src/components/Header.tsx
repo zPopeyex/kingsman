@@ -22,7 +22,7 @@ export function Header() {
           </span>
         </Link>
 
-        {/* Navegación */}
+        {/* Navegación Desktop */}
         <nav className="hidden md:flex items-center gap-4">
           <Link
             to="/"
@@ -42,7 +42,18 @@ export function Header() {
           >
             Trabajos
           </Link>
-          {/* Panel admin visible solo con permiso */}
+          <Link
+            to="/shop"
+            className="text-sm text-neutral-300 hover:text-[#D4AF37] transition"
+          >
+            Tienda
+          </Link>
+          <Link
+            to="/profile"
+            className="text-sm text-neutral-300 hover:text-[#D4AF37] transition"
+          >
+            Perfil
+          </Link>
           {hasPermission(profile, "admin_panel") && (
             <Link
               to="/admin"
@@ -53,7 +64,7 @@ export function Header() {
           )}
         </nav>
 
-        {/* Login / Usuario */}
+        {/* Login / Usuario solo Desktop */}
         <div className="hidden md:flex items-center gap-3">
           {loading ? null : user ? (
             <>

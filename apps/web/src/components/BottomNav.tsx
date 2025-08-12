@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactElement } from "react";
 
-type TabKey = "home" | "shop" | "promos" | "profile";
+type TabKey = "home" | "schedule" | "works" | "shop" | "profile";
 type Props = {
   value: TabKey;
   onChange?: (t: TabKey) => void;
@@ -16,7 +16,6 @@ const TABS: {
   {
     key: "home",
     label: "Inicio",
-    // Casa sin chimenea, con relleno blanco si activa
     icon: (a) => (
       <svg
         width="24"
@@ -26,6 +25,43 @@ const TABS: {
         className={a ? "fill-white" : "fill-[var(--kb-muted)]"}
       >
         <path d="M10.293 3.293a1 1 0 0 1 1.414 0l8 8a1 1 0 1 1-1.414 1.414L18 12.414V19a2 2 0 0 1-2 2h-3v-5a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v5H6a2 2 0 0 1-2-2v-6.586l-.293.293A1 1 0 1 1 2.293 11.293l8-8Z" />
+      </svg>
+    ),
+  },
+  {
+    key: "schedule",
+    label: "Agendar",
+    icon: (a) => (
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        aria-hidden
+        className={a ? "stroke-white" : "stroke-[var(--kb-muted)]"}
+      >
+        <g fill="none" strokeWidth="1.8" strokeLinecap="round">
+          <rect x="3" y="5" width="18" height="16" rx="2" />
+          <path d="M16 3v4M8 3v4M3 9h18" />
+        </g>
+      </svg>
+    ),
+  },
+  {
+    key: "works",
+    label: "Trabajos",
+    icon: (a) => (
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        aria-hidden
+        className={a ? "stroke-white" : "stroke-[var(--kb-muted)]"}
+      >
+        <g fill="none" strokeWidth="1.8" strokeLinecap="round">
+          <path d="M3 7l8 8M3 15l8-8" />
+          <circle cx="17" cy="7" r="3" />
+          <circle cx="17" cy="17" r="3" />
+        </g>
       </svg>
     ),
   },
@@ -43,24 +79,6 @@ const TABS: {
         <g fill="none" strokeWidth="1.8" strokeLinecap="round">
           <path d="M5 8h14l-1.2 11.2A2 2 0 0 1 15.8 21H8.2a2 2 0 0 1-2-1.8L5 8Z" />
           <path d="M9 10V7a3 3 0 0 1 6 0v3" />
-        </g>
-      </svg>
-    ),
-  },
-  {
-    key: "promos",
-    label: "Promos",
-    icon: (a) => (
-      <svg
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        aria-hidden
-        className={a ? "stroke-white" : "stroke-[var(--kb-muted)]"}
-      >
-        <g fill="none" strokeWidth="1.8" strokeLinecap="round">
-          <path d="M3 12.5V7a2 2 0 0 1 2-2h5.5l8 8a2 2 0 0 1 0 2.8l-4.7 4.7a2 2 0 0 1-2.8 0l-8-8Z" />
-          <path d="M7.5 8.5h.01M14.5 11.5l-5 5" />
         </g>
       </svg>
     ),
@@ -89,7 +107,7 @@ const tokensCSS = `
 :root{
   --kb-bg:#0B0B0B;
   --kb-surface:#111111;
-  --kb-gold:#C9A227; /* dorado más cálido */
+  --kb-gold:#C9A227;
   --kb-text:#EAEAEA;
   --kb-muted:#9A9A9A;
   --kb-radius:18px;
@@ -247,7 +265,7 @@ export default function BottomNav({ value, onChange, maxWidth = 420 }: Props) {
             </div>
 
             {/* tabs */}
-            <ul className="grid grid-cols-4 h-full relative z-10 select-none">
+            <ul className="grid grid-cols-5 h-full relative z-10 select-none">
               {TABS.map((t, i) => {
                 const active = value === t.key;
                 return (

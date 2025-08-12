@@ -24,8 +24,9 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/citas" element={<Booking />} />
-        <Route path="/tienda" element={<Shop />} />
         <Route path="/trabajos" element={<Works />} />
+        <Route path="/shop" element={<Shop />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/sobre-nosotros" element={<About />} />
         <Route
           path="/admin"
@@ -35,7 +36,6 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/perfil" element={<Profile />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-of-service" element={<TermsOfService />} />
       </Routes>

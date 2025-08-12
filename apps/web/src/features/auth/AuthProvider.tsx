@@ -1,10 +1,27 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { auth, db, googleProvider } from "@/lib/firebase";
-import { onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
-import type { User as FirebaseUser } from "firebase/auth"; // ✅ tipo, no valor
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type PropsWithChildren,
+} from "react";
+import {
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  signInWithPopup,
+  signOut,
+  type User as FirebaseUser,
+} from "firebase/auth";
+import { auth } from "@/lib/firebase"; // <-- tu auth inicializado
+import { db } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
-import type { UserDoc } from "@/types/user";
+type UserDoc = {
+  nickname?: string;
+  phone?: string;
+  photoURL?: string;
+  // agrega otros campos si los tienes
+};
 
 type AuthState = {
   user: FirebaseUser | null;
@@ -12,61 +29,63 @@ type AuthState = {
   loading: boolean;
   loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
+  setProfile: React.Dispatch<React.SetStateAction<UserDoc | null>>;
 };
 
 const Ctx = createContext<AuthState | null>(null);
 
-export const AuthProvider: React.FC<React.PropsWithChildren> = ({
-  children,
-}) => {
+export function AuthProvider({ children }: PropsWithChildren) {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [profile, setProfile] = useState<UserDoc | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    return onAuthStateChanged(auth, async (u) => {
+    const unsub = onAuthStateChanged(auth, async (u) => {
       setUser(u);
-      if (!u) {
-        setProfile(null);
-        setLoading(false);
-        return;
-      }
-      // crea/lee user doc
-      const ref = doc(db, "users", u.uid);
-      const snap = await getDoc(ref);
-      if (!snap.exists()) {
-        const payload: UserDoc = {
-          displayName: u.displayName,
-          nickname: u.displayName,
-          phone: null,
-          photoURL: u.photoURL,
-          role: "client",
-          createdAt: Date.now(),
-        };
-        await setDoc(ref, payload);
-        setProfile(payload);
+      if (u) {
+        // cargar/crear documento de usuario
+        const ref = doc(db, "users", u.uid);
+        const snap = await getDoc(ref);
+        if (!snap.exists()) {
+          const baseDoc: UserDoc = {
+            nickname: u.displayName ?? "",
+            photoURL: u.photoURL ?? "",
+          };
+          await setDoc(ref, baseDoc, { merge: true });
+          setProfile(baseDoc);
+        } else {
+          setProfile(snap.data() as UserDoc);
+        }
       } else {
-        setProfile(snap.data() as UserDoc);
+        setProfile(null);
       }
       setLoading(false);
     });
+    return () => unsub();
   }, []);
 
   const loginWithGoogle = async () => {
-    await signInWithPopup(auth, googleProvider);
+    const provider = new GoogleAuthProvider();
+    await signInWithPopup(auth, provider);
+    // NO navegamos aquí; la UI decide a dónde ir
   };
 
   const logout = async () => {
     await signOut(auth);
+    // NO uses useNavigate aquí — la redirección la hace el componente (p.ej., Profile)
   };
 
-  const value = useMemo(
-    () => ({ user, profile, loading, loginWithGoogle, logout }),
-    [user, profile, loading]
-  );
+  const value: AuthState = {
+    user,
+    profile,
+    loading,
+    loginWithGoogle,
+    logout,
+    setProfile,
+  };
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
-};
+}
 
 export const useAuth = () => {
   const v = useContext(Ctx);

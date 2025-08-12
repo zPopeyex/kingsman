@@ -6,6 +6,7 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
 
 // Email sintético desde apodo
 function emailFromNick(nick: string) {
@@ -19,6 +20,7 @@ function emailFromNick(nick: string) {
 export default function LoginScreen() {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const { loginWithGoogle } = useAuth();
+  const navigate = useNavigate();
 
   const [nickname, setNickname] = useState("");
   const [phone, setPhone] = useState("");
@@ -61,6 +63,7 @@ export default function LoginScreen() {
         setMsg("Cuenta creada. ¡Bienvenido!");
       } else {
         await signInWithEmailAndPassword(auth, email, password);
+        navigate("/", { replace: true });
       }
     } catch (err: any) {
       setMsg(err.message || "Error de autenticación");
@@ -159,7 +162,14 @@ export default function LoginScreen() {
 
           {/* Botón Google debajo del form */}
           <button
-            onClick={loginWithGoogle}
+            onClick={async () => {
+              try {
+                await loginWithGoogle();
+                navigate("/", { replace: true }); // siempre redirige al inicio
+              } catch (err) {
+                console.error(err);
+              }
+            }}
             disabled={busy}
             className="mt-4 w-full h-11 rounded-xl border border-neutral-700 bg-white text-black hover:opacity-90 transition flex items-center justify-center gap-3"
           >
