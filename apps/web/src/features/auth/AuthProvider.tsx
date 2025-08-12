@@ -1,13 +1,9 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { auth, db, googleProvider } from "@/lib/firebase";
-import {
-  onAuthStateChanged,
-  signInWithPopup,
-  signOut,
-} from "firebase/auth";
+import { onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
 import type { User as FirebaseUser } from "firebase/auth"; // ✅ tipo, no valor
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { DEFAULT_ROLE } from "@/lib/roles";
+
 import type { UserDoc } from "@/types/user";
 
 type AuthState = {
@@ -20,7 +16,9 @@ type AuthState = {
 
 const Ctx = createContext<AuthState | null>(null);
 
-export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
+export const AuthProvider: React.FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [profile, setProfile] = useState<UserDoc | null>(null);
   const [loading, setLoading] = useState(true);
@@ -62,7 +60,10 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     await signOut(auth);
   };
 
-  const value = useMemo(() => ({ user, profile, loading, loginWithGoogle, logout }), [user, profile, loading]);
+  const value = useMemo(
+    () => ({ user, profile, loading, loginWithGoogle, logout }),
+    [user, profile, loading]
+  );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 };

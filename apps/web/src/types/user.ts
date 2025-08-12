@@ -7,4 +7,5 @@ export type UserDoc = {
   photoURL: string | null;
   role: Role;
   createdAt: number; // Date.now()
+  permissions?: string[];
 };
