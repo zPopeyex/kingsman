@@ -8,6 +8,15 @@ import About from "@/pages/About";
 import Admin from "@/pages/Admin";
 import Profile from "@/pages/Profile";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
+
+// Ejemplo con React Router
+<Routes>
+  {/* ...otras rutas */}
+  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+  <Route path="/terms-of-service" element={<TermsOfService />} />
+</Routes>;
 
 export default function App() {
   return (
@@ -18,8 +27,17 @@ export default function App() {
         <Route path="/tienda" element={<Shop />} />
         <Route path="/trabajos" element={<Works />} />
         <Route path="/sobre-nosotros" element={<About />} />
-        <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <Admin />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/perfil" element={<Profile />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms-of-service" element={<TermsOfService />} />
       </Routes>
     </Layout>
   );
