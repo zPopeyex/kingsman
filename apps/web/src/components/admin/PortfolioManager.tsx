@@ -1,6 +1,6 @@
 // web/apps/src/components/admin/PortfolioManager.tsx
 import React, { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, Upload, Save, X, Eye } from "lucide-react";
+import { Plus, Edit, Trash2, Upload, Save, X } from "lucide-react";
 import type { PortfolioImage } from "../../utils/imageUtils";
 
 interface PortfolioManagerProps {

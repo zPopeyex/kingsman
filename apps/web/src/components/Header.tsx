@@ -29,7 +29,8 @@ const Header: React.FC = () => {
   }
 
   // Obtener rutas visibles basadas en permisos
-  const visibleRoutes = getVisibleRoutes(hasPermission, isAdmin);
+  // Obtener rutas visibles (según firma de getVisibleRoutes solo acepta isAdmin)
+  const visibleRoutes = getVisibleRoutes(isAdmin);
 
   const isActive = (path: string): boolean => {
     if (path === "/") {
