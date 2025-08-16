@@ -1,7 +1,7 @@
-// web/apps/src/components/navigation/DesktopNav.tsx - Actualizado con sincronización mobile
+// web/apps/src/components/navigation/DesktopNav.tsx
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { routes, getVisibleRoutesSimple } from "@/config/routes";
+import { getVisibleRoutes } from "@/config/routes";
 import { useAuth } from "../../hooks/useAuth";
 
 interface DesktopNavProps {
@@ -11,13 +11,7 @@ interface DesktopNavProps {
 const DesktopNav: React.FC<DesktopNavProps> = ({ position = "top" }) => {
   const location = useLocation();
   const { isAdmin } = useAuth();
-
-  // SOLUCIÓN SIMPLE: Mostrar TODAS las rutas excepto admin si no es admin
-  const visibleRoutes = routes.filter((route) => {
-    // Solo ocultar admin si no eres admin
-    if (route.path === "/admin" && !isAdmin) return false;
-    return true;
-  });
+  const visibleRoutes = getVisibleRoutes(isAdmin);
 
   const isActive = (path: string): boolean => {
     if (path === "/") {
@@ -61,7 +55,7 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ position = "top" }) => {
             </div>
           )}
 
-          {/* Navigation links - LAS MISMAS 5 RUTAS QUE MOBILE */}
+          {/* Navigation links */}
           <div
             className={`flex items-center space-x-1 ${!isTop ? "mx-auto" : ""}`}
           >
@@ -97,7 +91,7 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ position = "top" }) => {
                   />
                   <span className="hidden lg:inline-block">{route.label}</span>
 
-                  {/* Active indicator line - sincronizado con mobile */}
+                  {/* Active indicator line */}
                   {isCurrentRoute && (
                     <span
                       className={`absolute ${
@@ -115,7 +109,7 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ position = "top" }) => {
           {isTop && (
             <div className="flex-shrink-0">
               <Link
-                to="/agendar" // Apunta a tu ruta de citas correcta
+                to="/agendar"
                 className="
                   inline-flex items-center px-6 py-2.5 rounded-2xl
                   bg-gradient-to-r from-[#D4AF37] to-[#C7A936]

@@ -1,18 +1,8 @@
 // web/apps/src/pages/Trabajos.tsx
 import React, { useState, useEffect, useRef } from "react";
 import { X, ExternalLink, Heart } from "lucide-react";
-import type { PortfolioImage } from "../utils/imageUtils"; // ← CAMBIO: type import
+import type { PortfolioImage } from "../utils/imageUtils";
 import { buildSrcSet, buildSizes, getAspectRatio } from "../utils/imageUtils";
-
-let reflowQueued = false;
-const triggerReflow = () => {
-  if (reflowQueued) return;
-  reflowQueued = true;
-  requestAnimationFrame(() => {
-    window.dispatchEvent(new Event("resize"));
-    reflowQueued = false;
-  });
-};
 
 // Importar los datos del JSON
 import portfolioData from "../data/portafolio.json";
@@ -32,6 +22,17 @@ if (typeof document !== "undefined") {
   document.head.appendChild(style);
 }
 
+// Función triggerReflow global
+let reflowQueued = false;
+const triggerReflow = () => {
+  if (reflowQueued) return;
+  reflowQueued = true;
+  requestAnimationFrame(() => {
+    window.dispatchEvent(new Event("resize"));
+    reflowQueued = false;
+  });
+};
+
 const Trabajos: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<PortfolioImage | null>(
     null
@@ -47,7 +48,6 @@ const Trabajos: React.FC = () => {
     // Simular carga de datos
     const loadPortfolio = async () => {
       try {
-        // En tu caso real, esto vendría del JSON
         setImages(portfolioData as PortfolioImage[]);
         setIsLoading(false);
       } catch (error) {
@@ -190,9 +190,6 @@ const ImageCard: React.FC<ImageCardProps> = ({
   const [isLoaded, setIsLoaded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const isLocal = image.src.startsWith("/assets/");
-  function triggerReflow() {
-    throw new Error("Function not implemented.");
-  }
 
   return (
     <div
@@ -218,9 +215,9 @@ const ImageCard: React.FC<ImageCardProps> = ({
           width={image.width}
           height={image.height}
           className={`
-    block w-full h-auto transition-all duration-700
-    ${isLoaded ? "opacity-100 scale-100" : "opacity-0 scale-105"}
-  `}
+            block w-full h-auto transition-all duration-700
+            ${isLoaded ? "opacity-100 scale-100" : "opacity-0 scale-105"}
+          `}
           style={{ aspectRatio: getAspectRatio(image.width, image.height) }}
           onLoad={() => {
             setIsLoaded(true);
@@ -235,10 +232,10 @@ const ImageCard: React.FC<ImageCardProps> = ({
         {/* Overlay de hover */}
         <div
           className={`
-          absolute inset-0 bg-gradient-to-t from-[#0B0B0B]/80 via-transparent to-transparent
-          transition-opacity duration-300
-          ${isHovered ? "opacity-100" : "opacity-0"}
-        `}
+            absolute inset-0 bg-gradient-to-t from-[#0B0B0B]/80 via-transparent to-transparent
+            transition-opacity duration-300
+            ${isHovered ? "opacity-100" : "opacity-0"}
+          `}
         />
 
         {/* Indicador de categoría */}
@@ -251,9 +248,13 @@ const ImageCard: React.FC<ImageCardProps> = ({
         {/* Contenido de hover */}
         <div
           className={`
-          absolute bottom-0 left-0 right-0 p-6 transform transition-all duration-300
-          ${isHovered ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}
-        `}
+            absolute bottom-0 left-0 right-0 p-6 transform transition-all duration-300
+            ${
+              isHovered
+                ? "translate-y-0 opacity-100"
+                : "translate-y-4 opacity-0"
+            }
+          `}
         >
           <h3 className="text-xl font-semibold text-white mb-2">
             {image.title}
@@ -266,9 +267,9 @@ const ImageCard: React.FC<ImageCardProps> = ({
         {/* Borde dorado en hover */}
         <div
           className={`
-          absolute inset-0 border-2 border-[#D4AF37] rounded-2xl transition-opacity duration-300
-          ${isHovered ? "opacity-100" : "opacity-0"}
-        `}
+            absolute inset-0 border-2 border-[#D4AF37] rounded-2xl transition-opacity duration-300
+            ${isHovered ? "opacity-100" : "opacity-0"}
+          `}
         />
       </div>
     </div>

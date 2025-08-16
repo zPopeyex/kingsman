@@ -75,7 +75,7 @@ const layoutMasonry = (
   // Reset container
   container.style.position = 'relative';
 
-  items.forEach((item, index) => {
+  items.forEach((item) => {
     // Encontrar la columna más corta
     const shortestColumnIndex = columnHeights.indexOf(Math.min(...columnHeights));
     

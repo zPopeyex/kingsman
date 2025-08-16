@@ -1,12 +1,12 @@
 // web/apps/src/components/navigation/MobileTabBar.tsx
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { routes, getVisibleRoutes } from "@/router";
-import { useAuth } from "../../hooks/useAuth"; // Mock por ahora
+import { getVisibleRoutes, type Route } from "@/config/routes";
+import { useAuth } from "../../hooks/useAuth";
 
 const MobileTabBar: React.FC = () => {
   const location = useLocation();
-  const { isAdmin } = useAuth(); // Mock implementation
+  const { isAdmin } = useAuth();
   const [activeIndex, setActiveIndex] = useState(0);
   const visibleRoutes = getVisibleRoutes(isAdmin);
 
@@ -22,7 +22,7 @@ const MobileTabBar: React.FC = () => {
   };
 
   useEffect(() => {
-    const currentIndex = visibleRoutes.findIndex((route) =>
+    const currentIndex = visibleRoutes.findIndex((route: Route) =>
       isActive(route.path)
     );
     if (currentIndex !== -1) {
@@ -50,7 +50,7 @@ const MobileTabBar: React.FC = () => {
       />
 
       <div className="relative flex justify-around items-center h-20 px-4">
-        {visibleRoutes.map((route, index) => {
+        {visibleRoutes.map((route: Route, index: number) => {
           const Icon = route.icon;
           const isCurrentRoute = isActive(route.path);
 

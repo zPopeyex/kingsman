@@ -32,7 +32,7 @@ export const useAuth = (): AuthState & AuthActions => {
   });
 
   // Mock login function
-  const login = async (email: string, password: string): Promise<void> => {
+  const login = async (email: string, _password: string): Promise<void> => {
     setAuthState(prev => ({ ...prev, isLoading: true }));
     
     // Simulate API call
@@ -71,7 +71,7 @@ export const useAuth = (): AuthState & AuthActions => {
   };
 
   // Mock register function
-  const register = async (email: string, password: string, phone?: string): Promise<void> => {
+  const register = async (email: string, _password: string, phone?: string): Promise<void> => {
     setAuthState(prev => ({ ...prev, isLoading: true }));
     
     // Simulate API call

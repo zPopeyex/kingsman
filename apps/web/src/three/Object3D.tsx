@@ -1,7 +1,6 @@
 // web/apps/src/three/Object3D.tsx
 import React, { useRef, useEffect, useState } from "react";
 import * as THREE from "three";
-import { scrollManager } from "../lib/scroll";
 
 interface Object3DProps {
   className?: string;

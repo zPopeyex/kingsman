@@ -4,7 +4,7 @@ import { useThreeResponsive } from "../hooks/useThreeResponsive";
 
 const Hero: React.FC = () => {
   const taglineRef = useRef<HTMLDivElement>(null);
-  const { shouldRender, isMobile, isReducedMotion } = useThreeResponsive();
+  const { shouldRender, isReducedMotion } = useThreeResponsive();
 
   useEffect(() => {
     // Animación de aparición de letras

@@ -129,3 +129,32 @@ export class ScrollManager {
 
 // Instancia global
 export const scrollManager = ScrollManager.getInstance()
+
+// Export función applyParallax requerida por GalleryFlow
+export const applyParallax = async (
+  items: HTMLElement[], 
+  options: { scrub?: number } = {}
+): Promise<() => void> => {
+  const { scrub = 0.8 } = options;
+  
+  // Aplicar parallax a cada elemento basado en su data-depth
+  const tweens = items.map(item => {
+    const depth = parseFloat(item.dataset.depth || '0.5');
+    return gsap.to(item, {
+      yPercent: -50 * depth,
+      ease: "none",
+      scrollTrigger: {
+        trigger: item,
+        start: "top bottom",
+        end: "bottom top",
+        scrub: scrub,
+        invalidateOnRefresh: true
+      }
+    });
+  });
+
+  // Retornar función de cleanup
+  return () => {
+    tweens.forEach(tween => tween.kill());
+  };
+};

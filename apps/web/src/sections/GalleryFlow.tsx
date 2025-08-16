@@ -14,8 +14,12 @@ export default function GalleryFlow() {
 
     // distintos data-depth para cada tarjeta
     const items = Array.from(el.querySelectorAll<HTMLElement>("[data-depth]"));
-    let dispose: any;
-    (async () => (dispose = await applyParallax(items, { scrub: 0.8 })))();
+    let dispose: (() => void) | undefined;
+
+    (async () => {
+      dispose = await applyParallax(items, { scrub: 0.8 });
+    })();
+
     return () => dispose && dispose();
   }, []);
 
