@@ -1,0 +1,27 @@
+
+[
+  {
+    "id": "cut-classic",
+    "title": "Corte clásico",
+    "price": 25000,
+    "durationMin": 30,
+    "image": "/images/services/corte-classic.webp",
+    "description": "Perfilado limpio y acabado con navaja."
+  },
+  {
+    "id": "beard-sculpt",
+    "title": "Diseño de barba",
+    "price": 20000,
+    "durationMin": 25,
+    "image": "/images/services/beard-sculpt.webp",
+    "description": "Definición y tratamiento con toalla caliente."
+  },
+  {
+    "id": "combo-king",
+    "title": "Combo Kingsman",
+    "price": 40000,
+    "durationMin": 55,
+    "image": "/images/services/combo-king.webp",
+    "description": "Corte + barba + styling con productos premium."
+  }
+]

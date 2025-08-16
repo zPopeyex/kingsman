@@ -1,18 +1,45 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kingsman Barber</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Prata&display=swap"
-      rel="stylesheet">
 
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="Kingsman Barber - Creamos looks de leyenda. Barbería premium con servicios de corte, afeitado y cuidado masculino." />
+  <meta name="keywords" content="barbería, corte de cabello, afeitado, cuidado masculino, premium, kingsman" />
+  <meta property="og:title" content="Kingsman Barber - Creamos looks de leyenda" />
+  <meta property="og:description" content="Barbería premium especializada en cortes clásicos y modernos" />
+  <meta property="og:type" content="website" />
+
+  <!-- Preconnect to Google Fonts for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Prevent flash of unstyled content -->
+  <style>
+    body {
+      visibility: hidden;
+    }
+
+    body.fonts-loaded {
+      visibility: visible;
+    }
+  </style>
+
+  <title>Kingsman Barber - Creamos looks de leyenda</title>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+
+  <script>
+    // Font loading optimization
+    document.fonts.ready.then(() => {
+      document.body.classList.add('fonts-loaded');
+    });
+  </script>
+</body>
+
 </html>

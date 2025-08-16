@@ -163,12 +163,7 @@ export default function LoginScreen() {
           {/* Botón Google debajo del form */}
           <button
             onClick={async () => {
-              try {
-                await loginWithGoogle();
-                navigate("/", { replace: true }); // siempre redirige al inicio
-              } catch (err) {
-                console.error(err);
-              }
+              await loginWithGoogle();
             }}
             disabled={busy}
             className="mt-4 w-full h-11 rounded-xl border border-neutral-700 bg-white text-black hover:opacity-90 transition flex items-center justify-center gap-3"

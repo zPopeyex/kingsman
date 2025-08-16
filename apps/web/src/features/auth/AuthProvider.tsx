@@ -63,6 +63,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   const loginWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({
+      prompt: "select_account", // 👈 siempre mostrar selección de cuenta
+    });
     await signInWithPopup(auth, provider);
     // NO navegamos aquí; la UI decide a dónde ir
   };

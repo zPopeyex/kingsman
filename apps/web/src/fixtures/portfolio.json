@@ -1,0 +1,23 @@
+[
+  {
+    "id": "look-urban",
+    "title": "Urban Fade",
+    "tags": ["fade", "urbano"],
+    "image": "/images/portfolio/urban-fade.webp",
+    "alt": "Corte fade con transición limpia"
+  },
+  {
+    "id": "classic-side",
+    "title": "Classic Side Part",
+    "tags": ["clásico"],
+    "image": "/images/portfolio/classic-side.webp",
+    "alt": "Peinado lateral con brillo sutil"
+  },
+  {
+    "id": "sharp-beard",
+    "title": "Sharp Beard",
+    "tags": ["barba"],
+    "image": "/images/portfolio/sharp-beard.webp",
+    "alt": "Diseño de barba marcado con navaja"
+  }
+]

@@ -12,6 +12,20 @@
     "deploy": "firebase deploy"
   },
   "devDependencies": {
+    "@types/body-parser": "^1.19.6",
+    "@types/caseless": "^0.12.5",
+    "@types/http-errors": "^2.0.5",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/long": "^4.0.2",
+    "@types/mime": "^3.0.4",
+    "@types/ms": "^2.1.0",
+    "@types/qs": "^6.14.0",
+    "@types/range-parser": "^1.2.7",
+    "@types/request": "^2.48.13",
+    "@types/serve-static": "^1.15.8",
+    "@types/three": "^0.179.0",
+    "@types/tough-cookie": "^4.0.5",
+    "@types/triple-beam": "^1.3.5",
     "firebase-tools": "^14.12.0"
   },
   "packageManager": "pnpm@9.0.0",
@@ -19,6 +33,7 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@heroicons/react": "^2.2.0"
+    "@heroicons/react": "^2.2.0",
+    "gsap": "^3.13.0"
   }
 }

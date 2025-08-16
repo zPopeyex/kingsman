@@ -1,0 +1,73 @@
+// kingsman/apps/web/src/router.tsx
+// NOTA: Este archivo es ALTERNATIVO a App.tsx
+// Solo usa uno de los dos enfoques, no ambos
+
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { Layout } from "@/components/Layout";
+import Home from "@/pages/Home";
+import Booking from "@/pages/Booking";
+import Works from "@/pages/Works";
+import Shop from "@/pages/Shop";
+import Profile from "@/pages/Profile";
+import About from "@/pages/About";
+import Admin from "@/pages/Admin";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
+import TermsOfService from "@/pages/TermsOfService";
+
+// Crear el router con las rutas
+export const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Layout />,
+    children: [
+      {
+        index: true,
+        element: <Home />,
+      },
+      {
+        path: "citas",
+        element: <Booking />,
+      },
+      {
+        path: "trabajos",
+        element: <Works />,
+      },
+      {
+        path: "shop",
+        element: <Shop />,
+      },
+      {
+        path: "profile",
+        element: <Profile />,
+      },
+      {
+        path: "sobre-nosotros",
+        element: <About />,
+      },
+      {
+        path: "admin",
+        element: (
+          <ProtectedRoute>
+            <Admin />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "privacy-policy",
+        element: <PrivacyPolicy />,
+      },
+      {
+        path: "terms-of-service",
+        element: <TermsOfService />,
+      },
+    ],
+  },
+]);
+
+// Componente Router Provider
+const AppRouter = () => {
+  return <RouterProvider router={router} />;
+};
+
+export default AppRouter;

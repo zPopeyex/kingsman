@@ -1,108 +1,213 @@
-import { Link } from "react-router-dom";
-import { useAuth } from "@/features/auth/AuthProvider";
-import { hasPermission } from "@/lib/checkPermission";
+// kingsman/apps/web/src/components/Header.tsx
+import React, { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { routes, getVisibleRoutes } from "@/config/routes";
+import { useAuthExtended } from "@/hooks/useAuthExtended";
+import { CogIcon } from "lucide-react";
 
-export function Header() {
-  const { user, profile, loginWithGoogle, logout, loading } = useAuth();
+const Header: React.FC = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
+  const { isAdmin, hasPermission, loading } = useAuthExtended();
+
+  // Durante la carga, mostrar un estado mínimo
+  if (loading) {
+    return (
+      <header className="fixed top-0 left-0 right-0 z-40 bg-[#0B0B0B]/80 backdrop-blur-xl border-b border-[#1A1A1A]">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <Link to="/" className="flex items-center group">
+            <h1 className="font-['Playfair_Display'] font-bold text-2xl text-[#D4AF37] tracking-wide">
+              KINGSMAN
+            </h1>
+            <span className="ml-2 text-[#C7C7C7] font-['Segoe_UI'] text-sm">
+              BARBER
+            </span>
+          </Link>
+        </div>
+      </header>
+    );
+  }
+
+  // Obtener rutas visibles basadas en permisos
+  const visibleRoutes = getVisibleRoutes(hasPermission, isAdmin);
+
+  const isActive = (path: string): boolean => {
+    if (path === "/") {
+      return location.pathname === "/";
+    }
+    return location.pathname.startsWith(path);
+  };
 
   return (
-    <header className="sticky top-0 z-30 bg-[#0B0B0B]/80 backdrop-blur border-b border-white/5">
-      <div className="mx-auto max-w-6xl px-4 h-14 flex items-center justify-between">
-        {/* Brand con logo */}
-        <Link to="/" className="flex items-center gap-3">
-          <div className="relative w-8 h-8 rounded-full overflow-hidden ring-1 ring-[#D4AF37]/40 shadow-[0_0_0_2px_rgba(212,175,55,.18)]">
-            <img
-              src="/logo-kingsman.webp"
-              alt="Kingsman Barber"
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <span className="font-serif text-[18px] tracking-wide text-[#D4AF37]">
-            Kingsman Barber
+    <header className="fixed top-0 left-0 right-0 z-40 bg-[#0B0B0B]/80 backdrop-blur-xl border-b border-[#1A1A1A]">
+      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        {/* Logo */}
+        <Link to="/" className="flex items-center group">
+          <h1 className="font-['Playfair_Display'] font-bold text-2xl text-[#D4AF37] tracking-wide group-hover:text-white transition-colors duration-300">
+            KINGSMAN
+          </h1>
+          <span className="ml-2 text-[#C7C7C7] font-['Segoe_UI'] text-sm">
+            BARBER
           </span>
         </Link>
 
-        {/* Navegación Desktop */}
-        <nav className="hidden md:flex items-center gap-4">
-          <Link
-            to="/"
-            className="text-sm text-neutral-300 hover:text-[#D4AF37] transition"
-          >
-            Inicio
-          </Link>
-          <Link
-            to="/citas"
-            className="text-sm text-neutral-300 hover:text-[#D4AF37] transition"
-          >
-            Agendar Cita
-          </Link>
-          <Link
-            to="/trabajos"
-            className="text-sm text-neutral-300 hover:text-[#D4AF37] transition"
-          >
-            Trabajos
-          </Link>
-          <Link
-            to="/shop"
-            className="text-sm text-neutral-300 hover:text-[#D4AF37] transition"
-          >
-            Tienda
-          </Link>
-          <Link
-            to="/profile"
-            className="text-sm text-neutral-300 hover:text-[#D4AF37] transition"
-          >
-            Perfil
-          </Link>
-          {hasPermission(profile, "admin_panel") && (
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center space-x-1">
+          {visibleRoutes.map((route) => {
+            // No mostrar admin en la nav principal, lo ponemos aparte
+            if (route.path === "/admin") return null;
+
+            const Icon = route.icon;
+            const isCurrentRoute = isActive(route.path);
+
+            return (
+              <Link
+                key={route.path}
+                to={route.path}
+                className={`
+                  group relative flex items-center gap-2 px-4 py-2 rounded-2xl
+                  transition-all duration-300 font-medium
+                  ${
+                    isCurrentRoute
+                      ? "bg-[#1A1A1A] text-[#D4AF37] shadow-[0_0_20px_rgba(212,175,55,0.15)]"
+                      : "text-[#C7C7C7] hover:text-white hover:bg-[#1A1A1A]/50"
+                  }
+                  focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:ring-offset-2 
+                  focus:ring-offset-[#0B0B0B]
+                `}
+                aria-label={route.ariaLabel || route.label}
+                aria-current={isCurrentRoute ? "page" : undefined}
+              >
+                <Icon
+                  className="w-4 h-4 transition-transform duration-300 group-hover:scale-110"
+                  aria-hidden="true"
+                />
+                <span className="hidden lg:inline-block">{route.label}</span>
+              </Link>
+            );
+          })}
+
+          {/* Admin link separado si tiene permisos */}
+          {hasPermission("admin_panel") && (
+            <>
+              <div className="w-px h-6 bg-[#1A1A1A] mx-2" />
+              <Link
+                to="/admin"
+                className={`
+                  group relative flex items-center gap-2 px-3 py-2 rounded-2xl
+                  transition-all duration-300 font-medium
+                  ${
+                    isActive("/admin")
+                      ? "bg-[#1A1A1A] text-[#D4AF37] shadow-[0_0_20px_rgba(212,175,55,0.15)]"
+                      : "text-[#C7C7C7] hover:text-white hover:bg-[#1A1A1A]/50"
+                  }
+                `}
+                aria-label="Panel de administración"
+              >
+                <CogIcon className="w-4 h-4" />
+                <span className="hidden lg:inline-block text-xs">Admin</span>
+              </Link>
+            </>
+          )}
+
+          {/* CTA Button - Solo si puede agendar */}
+          {hasPermission("book_appointment") && (
             <Link
-              to="/admin"
-              className="text-sm text-neutral-300 hover:text-[#D4AF37] transition"
+              to="/citas"
+              className="
+                ml-4 inline-flex items-center px-6 py-2.5 rounded-2xl
+                bg-gradient-to-r from-[#D4AF37] to-[#C7A936]
+                text-[#0B0B0B] font-semibold
+                hover:shadow-[0_0_25px_rgba(212,175,55,0.3)]
+                transform hover:scale-105 transition-all duration-300
+                focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:ring-offset-2 
+                focus:ring-offset-[#0B0B0B]
+              "
+              aria-label="Reservar cita ahora"
             >
-              Panel Admin
+              Reservar Ahora
             </Link>
           )}
         </nav>
 
-        {/* Login / Usuario solo Desktop */}
-        <div className="hidden md:flex items-center gap-3">
-          {loading ? null : user ? (
-            <>
-              <div className="flex items-center gap-2 max-w-[200px]">
-                <img
-                  src={
-                    user.photoURL ??
-                    `https://api.dicebear.com/8.x/initials/svg?seed=${
-                      profile?.nickname ?? "User"
-                    }`
-                  }
-                  alt="avatar"
-                  referrerPolicy="no-referrer"
-                  className="w-8 h-8 rounded-full border border-neutral-700 object-cover"
-                />
-                <span className="text-sm text-neutral-200 truncate">
-                  {user.displayName ?? profile?.nickname ?? "Usuario"}
-                </span>
-              </div>
-              <button
-                onClick={logout}
-                className="text-sm px-3 py-1.5 rounded-xl border border-neutral-700 hover:bg-neutral-800 transition"
-              >
-                Salir
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={loginWithGoogle}
-              className="text-sm px-3 py-1.5 rounded-xl bg-[#D4AF37] text-black hover:bg-[#F4D061] transition"
-            >
-              Entrar con Google
-            </button>
-          )}
-        </div>
+        {/* Mobile Menu Button */}
+        <button
+          className="md:hidden p-2 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] rounded-lg"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          aria-label="Abrir menú de navegación"
+          aria-expanded={isMenuOpen}
+        >
+          <div className="w-6 h-5 flex flex-col justify-between">
+            <span
+              className={`block h-0.5 bg-[#D4AF37] transition-transform duration-300 ${
+                isMenuOpen ? "rotate-45 translate-y-2" : ""
+              }`}
+            />
+            <span
+              className={`block h-0.5 bg-[#D4AF37] transition-opacity duration-300 ${
+                isMenuOpen ? "opacity-0" : ""
+              }`}
+            />
+            <span
+              className={`block h-0.5 bg-[#D4AF37] transition-transform duration-300 ${
+                isMenuOpen ? "-rotate-45 -translate-y-2" : ""
+              }`}
+            />
+          </div>
+        </button>
       </div>
+
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="md:hidden bg-[#1A1A1A]/95 backdrop-blur-sm border-t border-[#1A1A1A]">
+          <nav className="container mx-auto px-4 py-6 space-y-2">
+            {visibleRoutes.map((route) => {
+              const Icon = route.icon;
+              const isCurrentRoute = isActive(route.path);
+
+              return (
+                <Link
+                  key={route.path}
+                  to={route.path}
+                  className={`
+                    flex items-center gap-3 px-4 py-3 rounded-2xl
+                    transition-all duration-300
+                    ${
+                      isCurrentRoute
+                        ? "bg-[#D4AF37]/10 text-[#D4AF37]"
+                        : "text-[#C7C7C7] hover:text-white hover:bg-[#1A1A1A]/50"
+                    }
+                  `}
+                  onClick={() => setIsMenuOpen(false)}
+                  aria-current={isCurrentRoute ? "page" : undefined}
+                >
+                  <Icon className="w-5 h-5" />
+                  <span className="font-medium">{route.label}</span>
+                </Link>
+              );
+            })}
+
+            {/* CTA en mobile */}
+            {hasPermission("book_appointment") && (
+              <Link
+                to="/citas"
+                className="
+                  block w-full mt-4 px-6 py-3 rounded-2xl text-center
+                  bg-gradient-to-r from-[#D4AF37] to-[#C7A936]
+                  text-[#0B0B0B] font-semibold
+                  hover:shadow-[0_0_25px_rgba(212,175,55,0.3)]
+                  transition-all duration-300
+                "
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Reservar Ahora
+              </Link>
+            )}
+          </nav>
+        </div>
+      )}
     </header>
   );
-}
+};
 
 export default Header;

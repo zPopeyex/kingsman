@@ -1,0 +1,86 @@
+[
+  {
+    "id": "skin-fade-treatment-001",
+    "title": "Skin Fade con Tratamiento",
+    "caption": "Fade limpio y preciso, complementado con tratamiento capilar premium.",
+    "category": "Cortes",
+    "src": "/assets/images/portafolio/skin-fade-treatment-001.webp",
+    "alt": "Corte skin fade con tratamiento capilar premium en barbería Kingsman",
+    "width": 1600,
+    "height": 2000,
+    "priority": true,
+    "palette": ["#0B0B0B", "#D4AF37", "#1A1A1A"]
+  },
+  {
+    "id": "curly-fade-modern-002",
+    "title": "Fade Moderno para Cabello Rizado",
+    "caption": "Degradado moderno que resalta la textura natural del cabello rizado.",
+    "category": "Cortes",
+    "src": "/assets/images/portafolio/curly-fade-modern-002.webp",
+    "alt": "Corte fade moderno en cabello rizado con definición y estilo",
+    "width": 1600,
+    "height": 2000,
+    "priority": true,
+    "palette": ["#1A1A1A", "#D4AF37", "#C7C7C7"]
+  },
+  {
+    "id": "precision-fade-003",
+    "title": "Fade de Precisión",
+    "caption": "Transición perfectamente difuminada para un acabado impecable.",
+    "category": "Cortes",
+    "src": "/assets/images/portafolio/precision-fade-003.webp",
+    "alt": "Corte fade de precisión realizado por barbero profesional",
+    "width": 1600,
+    "height": 2000,
+    "priority": true,
+    "palette": ["#0B0B0B", "#D4AF37", "#C7C7C7"]
+  },
+  {
+    "id": "neck-tattoo-fade-004",
+    "title": "Fade con Tatuaje en la Nuca",
+    "caption": "Estilo único que integra un fade limpio con tatuaje visible en la nuca.",
+    "category": "Cortes",
+    "src": "/assets/images/portafolio/neck-tattoo-fade-004.webp",
+    "alt": "Corte fade que deja visible tatuaje en la nuca",
+    "width": 1600,
+    "height": 2000,
+    "priority": true,
+    "palette": ["#1A1A1A", "#D4AF37", "#FFFFFF"]
+  },
+  {
+    "id": "classic-taper-005",
+    "title": "Taper Clásico",
+    "caption": "Corte clásico con taper elegante y atemporal.",
+    "category": "Cortes",
+    "src": "/assets/images/portafolio/classic-taper-005.webp",
+    "alt": "Corte taper clásico con acabado elegante",
+    "width": 1600,
+    "height": 2000,
+    "priority": true,
+    "palette": ["#0B0B0B", "#D4AF37", "#C7A936"]
+  },
+  {
+    "id": "artistic-tattoo-006",
+    "title": "Tattoo Artístico en Corte",
+    "caption": "Diseño artístico integrado al corte para un look totalmente personalizado.",
+    "category": "Arte Capilar",
+    "src": "/assets/images/portafolio/artistic-tattoo-006.webp",
+    "alt": "Corte con diseño artístico y tatuaje capilar",
+    "width": 1600,
+    "height": 2000,
+    "priority": true,
+    "palette": ["#0B0B0B", "#D4AF37", "#1A1A1A"]
+  },
+  {
+    "id": "buzz-cut-premium-007",
+    "title": "Buzz Cut Premium",
+    "caption": "Corte al ras con acabado prolijo y detalles de barbería premium.",
+    "category": "Cortes",
+    "src": "/assets/images/portafolio/buzz-cut-premium-007.webp",
+    "alt": "Corte buzz cut con acabado profesional en barbería",
+    "width": 1600,
+    "height": 2000,
+    "priority": true,
+    "palette": ["#0B0B0B", "#D4AF37", "#1A1A1A"]
+  }
+]
