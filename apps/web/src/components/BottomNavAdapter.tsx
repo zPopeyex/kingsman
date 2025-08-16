@@ -1,7 +1,7 @@
 // web/apps/src/components/BottomNavAdapter.tsx - Mejorado con sincronización
 import { useLocation, useNavigate } from "react-router-dom";
 import BottomNav from "./BottomNav";
-import { useAuthExtended } from "@/hooks/useAuthExtended";
+//import { useAuthExtended } from "@/hooks/useAuthExtended";
 
 type TabKey = "home" | "schedule" | "works" | "shop" | "profile";
 
@@ -32,7 +32,7 @@ function pathToKey(pathname: string): TabKey {
 export default function BottomNavAdapter() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { isAdmin } = useAuthExtended();
+  //const { isAdmin } = useAuthExtended();
 
   const value = pathToKey(pathname);
 

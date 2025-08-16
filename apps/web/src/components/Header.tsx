@@ -1,7 +1,7 @@
 // kingsman/apps/web/src/components/Header.tsx
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { routes, getVisibleRoutes } from "@/config/routes";
+import { getVisibleRoutes } from "@/config/routes";
 import { useAuthExtended } from "@/hooks/useAuthExtended";
 import { CogIcon } from "lucide-react";
 

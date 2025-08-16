@@ -53,8 +53,8 @@ const SafeBlendModes: React.FC<SafeBlendModesProps> = ({
 const SafeBlendContext = React.createContext({
   supportsBlendModes: true,
   supportsBackdrop: true,
-  getBlendClass: (blendClass: string, fallback: string = "") => blendClass,
-  getBackdropClass: (backdropClass: string, fallback: string = "") =>
+  getBlendClass: (blendClass: string, _fallback: string = "") => blendClass,
+  getBackdropClass: (backdropClass: string, _fallback: string = "") =>
     backdropClass,
 });
 
