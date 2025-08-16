@@ -33,7 +33,7 @@ const Hero: React.FC = () => {
   ));
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden md:pt-14">
       {/* Background con gradiente y glow */}
       <div
         className="absolute inset-0 opacity-90"
@@ -51,7 +51,8 @@ const Hero: React.FC = () => {
         <div
           className="w-96 h-96 bg-contain bg-center bg-no-repeat"
           style={{
-            backgroundImage: "url(/assets/images/kingsman-logo.png)",
+            backgroundImage:
+              "url(/assets/images/kingsman_logo_transparent.webp)",
             filter: "sepia(1) hue-rotate(30deg) saturate(2)",
           }}
         />
@@ -95,7 +96,7 @@ const Hero: React.FC = () => {
                   className="w-full h-full bg-contain bg-center bg-no-repeat opacity-80"
                   style={{
                     backgroundImage:
-                      "url(/assets/images/kingsman-barber-icon.png)",
+                      "url(/assets/images/kingsman_logo_transparent.webp)",
                   }}
                 />
               </div>

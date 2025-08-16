@@ -1,0 +1,79 @@
+import { useEffect, useState } from "react";
+import { NavLink } from "react-router-dom";
+import { getVisibleRoutes } from "@/config/routes";
+import { useAuth } from "@/hooks/useAuth";
+
+export default function MobileTabBar() {
+  // Guard de runtime: solo en < lg (≤1023px)
+  const [isLtLg, setIsLtLg] = useState<boolean>(() =>
+    typeof window !== "undefined"
+      ? !window.matchMedia("(min-width: 1024px)").matches
+      : true
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mm = window.matchMedia("(min-width: 1024px)");
+    const onChange = () => setIsLtLg(!mm.matches);
+    mm.addEventListener?.("change", onChange);
+    // compatibilidad Safari antiguo
+    // ts-expect-error legacy
+    mm.addListener?.(onChange);
+    return () => {
+      mm.removeEventListener?.("change", onChange);
+      // ts-expect-error legacy
+      mm.removeListener?.(onChange);
+    };
+  }, []);
+
+  if (!isLtLg) {
+    // Seguridad extra: ocúltalo por CSS si por alguna razón se monta
+    return <nav className="hidden lg:block" aria-hidden />;
+  }
+
+  const { role } = useAuth();
+  const routes = getVisibleRoutes(role);
+
+  return (
+    // 👇 forzamos que solo exista visualmente en <lg
+    <nav
+      aria-label="Navegación inferior"
+      className="
+        block lg:hidden
+        fixed z-50
+        left-1/2 -translate-x-1/2
+        bottom-[max(0.5rem,env(safe-area-inset-bottom))]
+        w-[calc(100%-1rem)]
+        sm:w-[calc(100%-1.5rem)]
+        max-w-[820px]
+        rounded-2xl border border-white/10
+        bg-[#0B0B0B]/90 backdrop-blur
+        shadow-[0_20px_40px_rgba(0,0,0,.35)]
+        px-2 py-2
+      "
+    >
+      <ul className="grid grid-flow-col auto-cols-fr gap-1">
+        {routes.map((r) => (
+          <li key={r.path} className="min-w-0">
+            <NavLink
+              to={r.path}
+              className={({ isActive }) =>
+                [
+                  "group flex items-center justify-center gap-1.5 rounded-xl px-2 py-2 text-[13px] leading-none min-w-0",
+                  isActive
+                    ? "bg-white/5 border border-white/10 text-white"
+                    : "text-neutral-300 hover:bg-white/5 border border-transparent",
+                ].join(" ")
+              }
+              aria-label={r.ariaLabel || r.label}
+            >
+              <r.icon className="w-4 h-4 shrink-0 opacity-90" />
+              {/* títulos visibles desde 640px+ */}
+              <span className="truncate hidden sm:inline">{r.label}</span>
+            </NavLink>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}

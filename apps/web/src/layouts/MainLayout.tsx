@@ -1,4 +1,3 @@
-// kingsman/apps/web/src/layouts/MainLayout.tsx
 import Header from "@/components/Header";
 import BottomNavAdapter from "@/components/BottomNavAdapter";
 import { Outlet, useLocation } from "react-router-dom";
@@ -24,14 +23,14 @@ export default function MainLayout() {
         <AnimationsToggle />
       </div>
 
-      {/* Main content con padding para header y bottom nav */}
-      <main className="flex-1 pt-20 pb-[90px] sm:pb-0">
+      {/* Main content SIN padding-top en desktop */}
+      <main className="flex-1 pb-[90px] md:pb-0">
         <Outlet />
       </main>
 
-      {/* BottomNav solo en mobile y si no estamos en login/landing */}
+      {/* BottomNav solo en mobile */}
       {!hideUI && (
-        <div className="sm:hidden">
+        <div className="md:hidden">
           <BottomNavAdapter />
         </div>
       )}

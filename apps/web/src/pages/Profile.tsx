@@ -1,13 +1,15 @@
+// src/pages/Profile.tsx
 import { useEffect, useState } from "react";
-import { useAuth } from "@/features/auth/AuthProvider";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import Badge from "@/components/ui/Badge";
 
-// Pequeño ícono de lápiz (sin librerías externas)
+// Icono lápiz inline (sin libs externas)
 function PencilIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden {...props}>
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden {...props}>
       <path
         fill="currentColor"
         d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm2.92 2.33H5v-.92L14.06 7.52l.92.92L5.92 19.58zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
@@ -17,15 +19,13 @@ function PencilIcon(props: React.SVGProps<SVGSVGElement>) {
 }
 
 export default function Profile() {
-  const { user, logout } = useAuth();
+  const { user, logout, role } = useAuth(); // ← ahora trae 'role' y 'logout'
   const navigate = useNavigate();
 
   const [nickname, setNickname] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
   const [editingPhone, setEditingPhone] = useState(false);
   const [saving, setSaving] = useState(false);
-
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
   useEffect(() => {
     if (!user) return;
@@ -48,7 +48,7 @@ export default function Profile() {
     setSaving(true);
     try {
       await updateDoc(doc(db, "users", user.uid), { phone });
-      setEditingPhone(false); // ya se ve el valor actualizado porque viene del estado local
+      setEditingPhone(false);
     } catch (err) {
       console.error("Error updating phone:", err);
     } finally {
@@ -59,19 +59,26 @@ export default function Profile() {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate("/", { replace: true }); // te lleva a Inicio sin recargar
-    } catch (e) {
-      console.error(e);
+    } finally {
+      // Siempre volver a Inicio
+      navigate("/", { replace: true });
     }
   };
 
   if (!user) return null;
 
+  const roleLabel =
+    role === "admin"
+      ? "Administrador"
+      : role === "dev"
+      ? "Desarrollador"
+      : "Cliente";
+
   return (
     <div className="max-w-md mx-auto px-4 py-6 text-white">
       <h1 className="text-2xl font-bold mb-6">Perfil</h1>
 
-      {/* Foto solo lectura + nombre/apodo */}
+      {/* Foto + nombre + email + badge de rol */}
       <div className="flex flex-col items-center gap-3 mb-6">
         <img
           src={
@@ -86,13 +93,20 @@ export default function Profile() {
         />
         <div className="text-center">
           <p className="text-lg font-semibold">{nickname || "Usuario"}</p>
-          <p className="text-sm text-neutral-400">{user.email}</p>
+          {user.email ? (
+            <p className="text-sm text-neutral-400">{user.email}</p>
+          ) : null}
+          <div className="mt-2">
+            <Badge aria-label={`Rol del usuario: ${roleLabel}`}>
+              {roleLabel}
+            </Badge>
+          </div>
         </div>
       </div>
 
-      {/* WhatsApp (phone) */}
+      {/* WhatsApp (phone) con lápiz para editar */}
       <div className="mb-4">
-        <label className="block text-sm text-neutral-400 mb-1">Whatsapp</label>
+        <label className="block text-sm text-neutral-400 mb-1">WhatsApp</label>
 
         {!editingPhone ? (
           <div className="flex items-center justify-between bg-neutral-800 rounded-lg px-3 py-2">
@@ -128,16 +142,14 @@ export default function Profile() {
         )}
       </div>
 
-      {/* Cerrar sesión solo en móvil */}
-      {isMobile && (
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="w-full mt-6 px-4 py-2 rounded-xl border border-neutral-700 hover:bg-neutral-800 transition"
-        >
-          Cerrar sesión
-        </button>
-      )}
+      {/* Cerrar sesión: AHORA en todas las vistas (desktop y mobile) */}
+      <button
+        type="button"
+        onClick={handleLogout}
+        className="w-full mt-6 px-4 py-2 rounded-xl border border-neutral-700 hover:bg-neutral-800 transition"
+      >
+        Cerrar sesión
+      </button>
     </div>
   );
 }

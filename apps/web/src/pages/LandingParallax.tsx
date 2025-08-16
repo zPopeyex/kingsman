@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Preloader from "../components/Preloader";
-import Header from "../components/Header";
+
 import Hero from "../sections/Hero";
 import ParallaxLayers from "../sections/ParallaxLayers";
 import Servicios from "../sections/Servicios";
@@ -25,8 +25,6 @@ const LandingParallax: React.FC = () => {
     <SafeBlendModes fallbackClassName="no-blend-support">
       <div className="min-h-screen bg-background">
         {isLoading && <Preloader />}
-
-        <Header />
 
         <main>
           <Hero />

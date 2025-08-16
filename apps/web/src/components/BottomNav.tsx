@@ -199,7 +199,7 @@ export default function BottomNav({ value, onChange, maxWidth = 420 }: Props) {
       <nav
         role="navigation"
         aria-label="Bottom navigation"
-        className="fixed inset-x-0 bottom-0 z-50 pb-[env(safe-area-inset-bottom)] md:hidden"
+        className="fixed inset-x-0 bottom-0 z-50 pb-[env(safe-area-inset-bottom)] md:hidden" // CAMBIADO a md:hidden
       >
         <div className="mx-auto px-3" style={{ maxWidth }}>
           <div
