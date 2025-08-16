@@ -27,7 +27,7 @@ export const routes: Route[] = [
     component: "LandingParallax"
   },
   {
-    path: "/agendar",
+    path: "/citas",
     label: "Agendar",
     icon: CalendarIcon,
     ariaLabel: "Agendar una cita",
@@ -41,14 +41,14 @@ export const routes: Route[] = [
     component: "Works"
   },
   {
-    path: "/tienda",
+    path: "/shop",
     label: "Tienda",
     icon: ShoppingBagIcon,
     ariaLabel: "Explorar productos en tienda",
     component: "Shop"
   },
   {
-    path: "/perfil",
+    path: "/profile",
     label: "Perfil",
     icon: UserIcon,
     ariaLabel: "Mi perfil de usuario",
