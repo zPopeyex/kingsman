@@ -75,7 +75,7 @@ const BookingCanvasPreview: React.FC = () => {
 
   // Generar días para el calendario
   const generateWeekDays = () => {
-    const days = [];
+    const days: Date[] = [];
     const today = new Date();
     for (let i = 0; i < 7; i++) {
       const date = new Date(today);

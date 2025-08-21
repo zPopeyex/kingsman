@@ -238,7 +238,7 @@ export default function TestBookingUtils() {
       console.error("❌ Error en Firebase:", error);
       setResults((prev: any) => ({
         ...prev,
-        firebase: { error: error.message },
+        firebase: { error: onmessage },
       }));
     } finally {
       setLoading(false);
@@ -334,7 +334,7 @@ export default function TestBookingUtils() {
       console.error("❌ Error creando cita:", error);
       setResults((prev: any) => ({
         ...prev,
-        appointment: { error: error.message },
+        appointment: { error: onmessage },
       }));
     } finally {
       setLoading(false);

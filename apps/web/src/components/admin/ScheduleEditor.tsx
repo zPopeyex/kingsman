@@ -128,7 +128,7 @@ export default function ScheduleEditor() {
     }
   };
 
-  const timeOptions = [];
+  const timeOptions: string[] = [];
   for (let hour = 7; hour <= 21; hour++) {
     timeOptions.push(`${hour.toString().padStart(2, "0")}:00`);
     timeOptions.push(`${hour.toString().padStart(2, "0")}:30`);

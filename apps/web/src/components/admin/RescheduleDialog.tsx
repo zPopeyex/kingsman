@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
 import toast from "react-hot-toast";
 import { rescheduleAppointment } from "@/services/appointments";
 import type { Appointment } from "@/types/booking";
@@ -43,8 +42,8 @@ export default function RescheduleDialog({
     }
   };
 
-  const timeOptions = [];
-  for (let hour = 7; hour <= 21; hour++) {
+  const timeOptions: string[] = [];
+  for (let hour = 8; hour <= 20; hour++) {
     timeOptions.push(`${hour.toString().padStart(2, "0")}:00`);
     timeOptions.push(`${hour.toString().padStart(2, "0")}:30`);
   }

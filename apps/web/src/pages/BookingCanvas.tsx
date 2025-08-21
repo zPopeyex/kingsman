@@ -1,31 +1,47 @@
-import React, { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
+import type { FC, ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CalendarDays,
-  Clock,
   CreditCard,
   ChevronRight,
   ChevronLeft,
   Scissors,
   User,
-  Phone,
   BadgeCheck,
   Loader2,
 } from "lucide-react";
 import {
   generateSlots,
   filterTakenSlots,
-  isSlotAvailable,
   calculateEndTime,
-  groupSlotsByPeriod,
 } from "@/utils/slots";
 import { wompiService } from "@/services/wompi";
 import { createAppointment } from "@/services/appointments";
-import { Appointment, Barber, Service, WorkingSchedule } from "@/types/booking";
+import type { Appointment, Barber, Service } from "@/types/booking";
 
-// Canvas interactivo integrado con utils y servicios reales
+/* -------------------------------- Types --------------------------------- */
 
-// ---------- Mock data (barberos y servicios) ----------
+type StepProps = {
+  title: string;
+  subtitle?: string;
+  /** Componente de ícono (lucide) */
+  icon?: React.ComponentType<{ className?: string }>;
+  children?: ReactNode;
+};
+
+type StepHeaderProps = {
+  step: number;
+  of: number;
+  onBack?: () => void;
+};
+
+type MoneyProps = {
+  value: number;
+};
+
+/* ------------------------------- Mock data ------------------------------- */
+
 const BARBERS: Barber[] = [
   {
     id: "b-steven",
@@ -72,12 +88,13 @@ const SERVICES: Service[] = [
   },
 ];
 
-// ---------- UI components ----------
-const Step = ({ title, subtitle, icon: Icon, children }) => (
+/* ----------------------------- UI Components ----------------------------- */
+
+const Step: FC<StepProps> = ({ title, subtitle, icon: Icon, children }) => (
   <div className="bg-[#111] border border-[#D4AF37]/20 rounded-2xl p-5 md:p-6 shadow-xl">
     <div className="flex items-center gap-3 mb-4">
       <div className="p-2 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/30">
-        <Icon className="w-5 h-5 text-[#D4AF37]" />
+        {Icon ? <Icon className="w-5 h-5 text-[#D4AF37]" /> : null}
       </div>
       <div>
         <h3 className="text-[#D4AF37] font-semibold tracking-wide">{title}</h3>
@@ -88,7 +105,7 @@ const Step = ({ title, subtitle, icon: Icon, children }) => (
   </div>
 );
 
-const StepHeader = ({ step, of, onBack }) => (
+const StepHeader: FC<StepHeaderProps> = ({ step, of, onBack }) => (
   <div className="flex items-center justify-between mb-4">
     <div className="text-neutral-400 text-sm">
       Paso {step} de {of}
@@ -104,16 +121,19 @@ const StepHeader = ({ step, of, onBack }) => (
   </div>
 );
 
-const Money = ({ value }) => (
+const Money: FC<MoneyProps> = ({ value }) => (
   <span>
     {new Intl.NumberFormat("es-CO", {
       style: "currency",
       currency: "COP",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(value)}
   </span>
 );
 
-// ---------- Main Component ----------
+/* ----------------------------- Main Component ---------------------------- */
+
 export default function BookingCanvas() {
   const [step, setStep] = useState(1);
   const [barber, setBarber] = useState<Barber>(BARBERS[0]);
@@ -123,9 +143,10 @@ export default function BookingCanvas() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [isPaying, setIsPaying] = useState(false);
+
   const total = service?.price ?? 0;
 
-  // Slots disponibles filtrados con utils reales
+  // Slots disponibles
   const allSlots = useMemo(
     () => generateSlots(date, "09:00", "18:00", 30),
     [date]
@@ -133,10 +154,6 @@ export default function BookingCanvas() {
   const filteredSlots = useMemo(
     () => filterTakenSlots(allSlots, []),
     [allSlots]
-  );
-  const grouped = useMemo(
-    () => groupSlotsByPeriod(filteredSlots),
-    [filteredSlots]
   );
 
   const payNow = async () => {
@@ -161,7 +178,7 @@ export default function BookingCanvas() {
         userPhone: phone,
         userName: name,
         date,
-        start: slot!,
+        start: slot!, // validado en UI
         end: calculateEndTime(slot!, service.durationMinutes),
         serviceId: service.id,
         serviceName: service.name,
