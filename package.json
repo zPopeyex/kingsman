@@ -37,7 +37,13 @@
     "date-fns": "^4.1.0",
     "framer-motion": "^12.23.12",
     "gsap": "^3.13.0",
+    "lucide-react": "0.538.0",
     "react-day-picker": "^9.9.0",
     "react-hot-toast": "^2.6.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "lucide-react": "0.538.0"
+    }
   }
 }

@@ -7,7 +7,15 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "src"),
+      '@': path.resolve(__dirname, 'src'),
     },
   },
+  // ⬇️ evita que esbuild intente pre-empaquetar TODOS los reexports de lucide-react
+  optimizeDeps: {
+    exclude: ['lucide-react'],
+  },
+  // ⬇️ si haces SSR o Vercel lo interpreta como SSR/edge, descomenta esto:
+  // ssr: {
+  //   noExternal: ['lucide-react'],
+  // },
 })
