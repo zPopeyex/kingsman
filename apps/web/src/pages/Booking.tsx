@@ -33,14 +33,15 @@ import LoginScreen from "@/features/auth/LoginScreen";
 
 export default function Booking() {
   const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
 
   // Estados principales
   const [selectedBarber, setSelectedBarber] = useState<Barber | null>(null);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedTime, setSelectedTime] = useState<string>("");
-  const [paymentAmount, setPaymentAmount] = useState<number>(50000);
+  const [amount, setAmount] = useState<number>(selectedService?.price ?? 0);
+  const [userEditedAmount, setUserEditedAmount] = useState(false);
 
   // Estados de UI
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
@@ -54,9 +55,16 @@ export default function Booking() {
     const services = getServices();
     if (services.length > 0) {
       setSelectedService(services[1]); // Por defecto: Corte Premium
-      setPaymentAmount(services[1].price);
     }
   }, []);
+
+  useEffect(() => {
+    if (!selectedService) return;
+    setAmount((prev) => {
+      if (!userEditedAmount) return selectedService.price;
+      return Math.min(prev, selectedService.price);
+    });
+  }, [selectedService?.price, userEditedAmount]);
 
   // Cargar slots cuando cambia barbero o fecha
   useEffect(() => {
@@ -119,7 +127,7 @@ export default function Booking() {
       !selectedBarber ||
       !selectedService ||
       !selectedTime ||
-      !paymentAmount
+      !amount
     ) {
       toast.error("Por favor completa todos los campos");
       return;
@@ -148,11 +156,11 @@ export default function Booking() {
         end: calculateEndTime(selectedTime, selectedService.durationMinutes),
         serviceId: selectedService.id,
         serviceName: selectedService.name,
-        price: paymentAmount,
+        price: amount,
         status: "pending",
         payment: {
           provider: "wompi",
-          amount: paymentAmount,
+          amount,
           currency: "COP",
           ref: reference,
           status: "PENDING",
@@ -162,8 +170,8 @@ export default function Booking() {
       const appointmentId = await createAppointment(appointmentData);
 
       // Abrir checkout de Wompi
-      const transaction = await wompiService.openCheckout({
-        amount: paymentAmount,
+      await wompiService.openCheckout({
+        amount,
         currency: "COP",
         reference,
         customerEmail: user.email || undefined,
@@ -186,9 +194,11 @@ export default function Booking() {
           toast.error("Error al procesar el pago");
         },
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error creating booking:", error);
-      toast.error(error.message || "Error al crear la reserva");
+      const message =
+        error instanceof Error ? error.message : "Error al crear la reserva";
+      toast.error(message);
     } finally {
       setProcessing(false);
     }
@@ -199,7 +209,7 @@ export default function Booking() {
       selectedService &&
       selectedDate &&
       selectedTime &&
-      paymentAmount >= 10000
+      amount >= 10000
   );
 
   return (
@@ -254,7 +264,6 @@ export default function Booking() {
                     type="button"
                     onClick={() => {
                       setSelectedService(service);
-                      setPaymentAmount(service.price);
                       setCurrentStep(2);
                     }}
                     className={`
@@ -323,12 +332,11 @@ export default function Booking() {
                 5. Confirma tu Pago
               </h2>
               <PaymentBoxWompi
-                amount={paymentAmount}
-                onAmountChange={setPaymentAmount}
-                servicePrice={selectedService?.price || 0}
-                minAmount={10000}
-                maxAmount={selectedService?.price}
-                onPaymentInit={handleConfirmBooking}
+                servicePrice={selectedService?.price ?? 0}
+                amount={amount}
+                setAmount={setAmount}
+                userEditedAmount={userEditedAmount}
+                setUserEditedAmount={setUserEditedAmount}
               />
             </div>
           </div>
@@ -340,7 +348,7 @@ export default function Booking() {
               service={selectedService}
               date={selectedDate}
               time={selectedTime}
-              amount={paymentAmount}
+              amount={amount}
               onConfirm={handleConfirmBooking}
               loading={processing}
               isValid={isFormValid}
