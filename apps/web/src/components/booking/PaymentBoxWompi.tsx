@@ -1,47 +1,41 @@
-import React, { useState } from "react";
+import React from "react";
 import wompiService from "@/services/wompi";
+import { formatCOP } from "@/lib/money";
 
-interface PaymentBoxWompiProps {
-  amount: number;
-  onAmountChange: (amount: number) => void;
-  minAmount?: number;
-  maxAmount?: number;
+type Props = {
   servicePrice: number;
-  onPaymentInit: () => void;
-}
+  amount: number;
+  setAmount: (v: number) => void;
+  userEditedAmount: boolean;
+  setUserEditedAmount: (v: boolean) => void;
+};
+
+const MIN = 10_000;
+const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(v, hi));
+const parseCOP = (s: string) => Number(String(s).replace(/[^\d]/g, "")) || 0;
 
 export default function PaymentBoxWompi({
-  amount,
-  onAmountChange,
-  minAmount = 10000,
-  maxAmount,
   servicePrice,
-  onPaymentInit,
-}: PaymentBoxWompiProps) {
-  const [customAmount, setCustomAmount] = useState(amount.toString());
-
-  const quickAmounts = [30000, 50000, 70000, 100000];
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("es-CO", {
-      style: "currency",
-      currency: "COP",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
+  amount,
+  setAmount,
+  userEditedAmount,
+  setUserEditedAmount,
+}: Props) {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const n = clamp(parseCOP(e.target.value), MIN, servicePrice || MIN);
+    setAmount(n);
+    if (!userEditedAmount) setUserEditedAmount(true);
   };
 
-  const handleCustomAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, "");
-    setCustomAmount(value);
+  const suggestions = React.useMemo(() => {
+    if (!servicePrice) return [];
+    const values = [MIN, Math.round(servicePrice / 2), servicePrice];
+    return Array.from(
+      new Set(values.filter((v) => v >= MIN && v <= servicePrice))
+    ).sort((a, b) => a - b);
+  }, [servicePrice]);
 
-    const numValue = parseInt(value) || 0;
-    if (numValue >= minAmount && (!maxAmount || numValue <= maxAmount)) {
-      onAmountChange(numValue);
-    }
-  };
-
-  const validation = wompiService.validateAmount(amount, minAmount, maxAmount);
+  const validation = wompiService.validateAmount(amount, MIN, servicePrice || undefined);
 
   return (
     <div className="space-y-4">
@@ -51,7 +45,7 @@ export default function PaymentBoxWompi({
         </label>
         <div className="bg-[#1A1A1A]/50 rounded-xl p-3 border border-[#D4AF37]/10">
           <p className="text-2xl font-bold text-[#D4AF37]">
-            {formatCurrency(servicePrice)}
+            {formatCOP(servicePrice)}
           </p>
         </div>
       </div>
@@ -67,10 +61,11 @@ export default function PaymentBoxWompi({
           <input
             id="payment-amount"
             type="text"
-            value={formatCurrency(parseInt(customAmount) || 0)}
-            onChange={handleCustomAmountChange}
+            value={formatCOP(amount)}
+            onChange={handleChange}
             className="w-full bg-[#0B0B0B] border border-[#D4AF37]/20 rounded-xl px-4 py-3 pr-12 focus:border-[#D4AF37]/50 focus:outline-none transition-colors text-white"
-            placeholder={formatCurrency(minAmount)}
+            placeholder={formatCOP(MIN)}
+            inputMode="numeric"
             aria-label="Monto a pagar"
             aria-invalid={!validation.valid}
             aria-describedby={!validation.valid ? "amount-error" : undefined}
@@ -89,15 +84,14 @@ export default function PaymentBoxWompi({
       <div>
         <p className="text-xs text-[#C7C7C7] mb-2">Montos sugeridos:</p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          {quickAmounts.map((quickAmount) => (
+          {suggestions.map((quickAmount) => (
             <button
               key={quickAmount}
               type="button"
               onClick={() => {
-                setCustomAmount(quickAmount.toString());
-                onAmountChange(quickAmount);
+                setAmount(quickAmount);
+                if (!userEditedAmount) setUserEditedAmount(true);
               }}
-              disabled={maxAmount ? quickAmount > maxAmount : false}
               className={`
                 py-2 px-3 rounded-xl border transition-colors text-sm
                 ${
@@ -105,11 +99,10 @@ export default function PaymentBoxWompi({
                     ? "bg-[#D4AF37]/20 border-[#D4AF37] text-[#D4AF37]"
                     : "bg-[#0B0B0B] border-[#D4AF37]/20 hover:border-[#D4AF37]/50 text-white"
                 }
-                disabled:opacity-50 disabled:cursor-not-allowed
               `}
-              aria-label={`Seleccionar ${formatCurrency(quickAmount)}`}
+              aria-label={`Seleccionar ${formatCOP(quickAmount)}`}
             >
-              {formatCurrency(quickAmount)}
+              {formatCOP(quickAmount)}
             </button>
           ))}
         </div>
@@ -130,7 +123,7 @@ export default function PaymentBoxWompi({
           />
         </svg>
         <div className="text-sm text-[#C7C7C7] space-y-1">
-          <p>• Mínimo: {formatCurrency(minAmount)}</p>
+          <p>• Mínimo: {formatCOP(MIN)}</p>
           <p>• Pago seguro con Wompi</p>
           <p>• Confirmación instantánea</p>
         </div>
