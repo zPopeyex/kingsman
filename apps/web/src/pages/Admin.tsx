@@ -5,7 +5,7 @@ import { useAuth } from "@/features/auth/AuthProvider";
 import ScheduleEditor from "@/components/admin/ScheduleEditor";
 import AppointmentsTable from "@/components/admin/AppointmentsTable";
 import AdminDashboard from "@/components/admin/AdminDashboard";
-
+import BarberManagement from "@/components/admin/BarberManagement";
 import { Timestamp } from "firebase/firestore";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -182,16 +182,7 @@ export default function Admin() {
 
           {activeTab === "schedules" && <ScheduleEditor />}
 
-          {activeTab === "barbers" && (
-            <section className="bg-[#1A1A1A] rounded-2xl p-6 border border-[#D4AF37]/10">
-              <h2 className="text-xl font-bold text-[#D4AF37] mb-4">
-                Gestión de Barberos
-              </h2>
-              <p className="text-[#C7C7C7]">
-                Próximamente: Agregar, editar y gestionar barberos
-              </p>
-            </section>
-          )}
+          {activeTab === "barbers" && <BarberManagement />}
         </main>
       </AdminErrorBoundary>
     </div>
