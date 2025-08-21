@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import toast, { Toaster } from "react-hot-toast";
@@ -64,16 +64,10 @@ export default function Booking() {
       if (!userEditedAmount) return selectedService.price;
       return Math.min(prev, selectedService.price);
     });
-  }, [selectedService?.price, userEditedAmount]);
+  }, [selectedService, userEditedAmount]);
 
   // Cargar slots cuando cambia barbero o fecha
-  useEffect(() => {
-    if (selectedBarber && selectedDate) {
-      loadAvailableSlots();
-    }
-  }, [selectedBarber, selectedDate]);
-
-  const loadAvailableSlots = async () => {
+  const loadAvailableSlots = useCallback(async () => {
     if (!selectedBarber) return;
 
     setLoadingSlots(true);
@@ -114,7 +108,14 @@ export default function Booking() {
     } finally {
       setLoadingSlots(false);
     }
-  };
+  }, [selectedBarber, selectedDate]);
+
+  useEffect(() => {
+    if (selectedBarber && selectedDate) {
+      loadAvailableSlots();
+    }
+  }, [selectedBarber, selectedDate, loadAvailableSlots]);
+
 
   const handleConfirmBooking = async () => {
     // Validar auth on-demand
