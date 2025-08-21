@@ -12,7 +12,7 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID as string,
 };
 
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+export const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
 export const db = getFirestore(app);

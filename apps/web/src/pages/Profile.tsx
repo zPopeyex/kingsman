@@ -75,7 +75,7 @@ export default function Profile() {
       : "Cliente";
 
   return (
-    <div className="max-w-md mx-auto px-4 py-6 text-white">
+    <div className="max-w-md mx-auto px-4 py-6 text-white pt-20">
       <h1 className="text-2xl font-bold mb-6">Perfil</h1>
 
       {/* Foto + nombre + email + badge de rol */}
