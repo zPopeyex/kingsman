@@ -1,9 +1,8 @@
-import React from "react";
-import wompiService from "@/services/wompi";
 import { formatCOP } from "@/lib/money";
+import React from "react";
 
 type Props = {
-  servicePrice: number;
+  servicePrice: number; // precio del servicio seleccionado
   amount: number;
   setAmount: (v: number) => void;
   userEditedAmount: boolean;
@@ -11,99 +10,85 @@ type Props = {
 };
 
 const MIN = 10_000;
-const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(v, hi));
-const parseCOP = (s: string) => Number(String(s).replace(/[^\d]/g, "")) || 0;
+const STEP = 5_000;
 
-export default function PaymentBoxWompi({
-  servicePrice,
-  amount,
-  setAmount,
-  userEditedAmount,
-  setUserEditedAmount,
-}: Props) {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const n = clamp(parseCOP(e.target.value), MIN, servicePrice || MIN);
-    setAmount(n);
-    if (!userEditedAmount) setUserEditedAmount(true);
+const roundToStep = (n: number) => Math.round(n / STEP) * STEP;
+const unique = <T,>(arr: T[]) => Array.from(new Set(arr));
+const clamp = (v: number, lo: number, hi: number) =>
+  Math.max(lo, Math.min(v, hi));
+
+export default function PaymentBoxWompi(props: Props) {
+  const { servicePrice, amount, setAmount, setUserEditedAmount } = props;
+
+  // ❶ Sugeridos derivados (no state)
+  const suggestions = React.useMemo(() => {
+    const half = Math.max(MIN, roundToStep((servicePrice || 0) / 2));
+    const top = Math.max(MIN, roundToStep(servicePrice || 0));
+    return unique([MIN, half, top])
+      .filter((v) => v >= MIN && v <= Math.max(MIN, servicePrice || MIN))
+      .sort((a, b) => a - b);
+  }, [servicePrice]);
+
+  // ❷ Reset al cambiar de servicio (sin acumular)
+  React.useEffect(() => {
+    if (!servicePrice) return;
+    setAmount(Math.max(MIN, servicePrice));
+    setUserEditedAmount(false);
+  }, [servicePrice, setAmount, setUserEditedAmount]);
+
+  const onPick = (value: number) => {
+    setAmount(value);
+    setUserEditedAmount(true);
   };
 
-  const suggestions = [30000, 50000, 70000, 100000]
-    .map((v) => Math.min(v, servicePrice || v))
-    .filter((v) => v >= MIN);
+  const onChangeAmount: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    const raw = Number(e.target.value.replace(/\D/g, "")) || 0;
+    const capped = clamp(
+      roundToStep(raw),
+      MIN,
+      Math.max(MIN, servicePrice || MIN)
+    );
+    setAmount(capped);
+    setUserEditedAmount(true);
+  };
 
-  const validation = wompiService.validateAmount(amount, MIN, servicePrice || undefined);
+  const fmt = (v: number) =>
+    v.toLocaleString("es-CO", {
+      style: "currency",
+      currency: "COP",
+      maximumFractionDigits: 0,
+    });
 
   return (
-    <div className="space-y-4">
-      <div>
-        <label className="block text-sm text-[#C7C7C7] mb-2">
-          Valor del servicio
-        </label>
-        <div className="bg-[#1A1A1A]/50 rounded-xl p-3 border border-[#D4AF37]/10">
-          <p className="text-2xl font-bold text-[#D4AF37]">
-            {formatCOP(servicePrice)}
-          </p>
-        </div>
+    <div>
+      {/* Input existente (no se tocan estilos) */}
+      <div className="mt-3">
+        <input
+          inputMode="numeric"
+          value={amount ? amount.toString() : ""}
+          onChange={onChangeAmount}
+          className="w-full bg-[#0B0B0B] border border-[#D4AF37]/30 rounded-xl px-4 py-2 text-white"
+          placeholder={fmt(Math.max(MIN, servicePrice || MIN))}
+          aria-label="Monto a pagar"
+        />
+        <p className="text-xs text-[#C7C7C7] mb-2 pt-2">Montos sugeridos:</p>
       </div>
 
-      <div>
-        <label
-          htmlFor="payment-amount"
-          className="block text-sm text-[#C7C7C7] mb-2"
-        >
-          Monto a pagar (anticipo o total)
-        </label>
-        <div className="relative">
-          <input
-            id="payment-amount"
-            type="text"
-            value={formatCOP(amount)}
-            onChange={handleChange}
-            className="w-full bg-[#0B0B0B] border border-[#D4AF37]/20 rounded-xl px-4 py-3 pr-12 focus:border-[#D4AF37]/50 focus:outline-none transition-colors text-white"
-            placeholder={formatCOP(MIN)}
-            inputMode="numeric"
-            aria-label="Monto a pagar"
-            aria-invalid={!validation.valid}
-            aria-describedby={!validation.valid ? "amount-error" : undefined}
-          />
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#C7C7C7]">
-            COP
-          </span>
-        </div>
-        {!validation.valid && (
-          <p id="amount-error" className="mt-1 text-xs text-red-500">
-            {validation.error}
-          </p>
-        )}
-      </div>
+      {/* Botones sugeridos (3 fijos, no acumulables) */}
 
-      <div>
-        <p className="text-xs text-[#C7C7C7] mb-2">Montos sugeridos:</p>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          {suggestions.map((quickAmount) => (
-            <button
-              key={quickAmount}
-              type="button"
-              onClick={() => {
-                setAmount(quickAmount);
-                if (!userEditedAmount) setUserEditedAmount(true);
-              }}
-              className={`
-                py-2 px-3 rounded-xl border transition-colors text-sm
-                ${
-                  amount === quickAmount
-                    ? "bg-[#D4AF37]/20 border-[#D4AF37] text-[#D4AF37]"
-                    : "bg-[#0B0B0B] border-[#D4AF37]/20 hover:border-[#D4AF37]/50 text-white"
-                }
-              `}
-              aria-label={`Seleccionar ${formatCOP(quickAmount)}`}
-            >
-              {formatCOP(quickAmount)}
-            </button>
-          ))}
-        </div>
+      <div className="grid grid-cols-3 gap-3 mt-3 p-3 ">
+        {suggestions.map((v) => (
+          <button
+            key={`sugg-${servicePrice}-${v}`}
+            type="button"
+            onClick={() => onPick(v)}
+            className="rounded-xl border border-[#D4AF37]/40 px-4 py-2 hover:bg-[#D4AF37]/10"
+            aria-label={`Pagar ${fmt(v)}`}
+          >
+            {fmt(v)}
+          </button>
+        ))}
       </div>
-
       <div className="flex items-start gap-3 p-3 bg-[#D4AF37]/10 rounded-xl">
         <svg
           className="w-5 h-5 text-[#D4AF37] flex-shrink-0 mt-0.5"
@@ -119,7 +104,10 @@ export default function PaymentBoxWompi({
           />
         </svg>
         <div className="text-sm text-[#C7C7C7] space-y-1">
-          <p>• Mínimo: {formatCOP(MIN)}</p>
+          <p className="mt-1 text-xs text-[#C7C7C7]">
+            • Mínimo {fmt(MIN)} · Máximo{" "}
+            {fmt(Math.max(MIN, servicePrice || MIN))}
+          </p>
           <p>• Pago seguro con Wompi</p>
           <p>• Confirmación instantánea</p>
         </div>

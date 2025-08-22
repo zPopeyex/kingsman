@@ -102,7 +102,7 @@ const Trabajos: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0B0B] text-white">
+    <div className="min-h-screen bg-[#0B0B0B] text-white pt-1">
       {/* Header */}
       <header className="pt-24 pb-12 px-6">
         <div className="max-w-7xl mx-auto text-center">
