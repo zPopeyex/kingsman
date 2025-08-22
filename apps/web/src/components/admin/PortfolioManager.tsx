@@ -15,7 +15,7 @@ import {
   loadPortfolioFromFirebase,
   savePortfolioToFirebase,
   uploadImageToFirebase,
-} from "@/services/firebase-portfolio";
+} from "../../services/firebase-portfolio";
 // TODO: Usar el servicio global cuando esté implementado
 // import { usePortfolio } from '../services/portfolioService';
 
