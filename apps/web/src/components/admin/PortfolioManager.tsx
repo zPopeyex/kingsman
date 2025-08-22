@@ -40,24 +40,10 @@ const PortfolioManager: React.FC<PortfolioManagerProps> = () => {
   const loadPortfolioWorks = async () => {
     try {
       setLoading(true);
-
-      // TODO: Uncomment to use Firebase
-      // import { loadPortfolioFromFirebase } from '../services/firebase-portfolio';
       const data = await loadPortfolioFromFirebase();
       setWorks(data);
-
-      // Fallback: cargar desde el archivo JSON local
-      const response = await fetch("/src/data/portafolio.json");
-      if (response.ok) {
-        const data = await response.json();
-        setWorks(Array.isArray(data) ? data : []);
-      } else {
-        console.warn("No se pudo cargar portafolio.json");
-        setWorks([]);
-      }
     } catch (error) {
       console.error("Error loading portfolio works:", error);
-      // Fallback a datos vacíos
       setWorks([]);
     } finally {
       setLoading(false);
@@ -71,15 +57,10 @@ const PortfolioManager: React.FC<PortfolioManagerProps> = () => {
     try {
       // TODO: Uncomment to use Firebase
       // import { savePortfolioToFirebase } from '../services/firebase-portfolio';
-      try {
-        await savePortfolioToFirebase(works);
-        setHasChanges(false);
-        alert("Cambios guardados en Firebase exitosamente!");
-        return;
-      } catch (firebaseError) {
-        console.log("Firebase falló, usando fallback:", firebaseError);
-        // Continúa con el fallback
-      }
+      await savePortfolioToFirebase(works);
+      setHasChanges(false);
+      alert("Cambios guardados en Firebase exitosamente!");
+      return;
 
       // Guardar en localStorage como backup
       try {
