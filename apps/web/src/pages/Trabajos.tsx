@@ -3,10 +3,25 @@ import React, { useState, useEffect, useRef } from "react";
 import { X, ExternalLink, Heart } from "lucide-react";
 import type { PortfolioImage } from "../utils/imageUtils";
 import { buildSrcSet, buildSizes, getAspectRatio } from "../utils/imageUtils";
+import { usePortfolio } from "@/services/portfolioService";
 
 // Importar los datos del JSON
 import portfolioData from "../data/portafolio.json";
+const TrabajosComponent = () => {
+  const { works, loading, getWorksByCategory } = usePortfolio();
 
+  // Ahora 'works' se actualiza automáticamente cuando agregues desde admin
+  const cortes = getWorksByCategory("Cortes");
+  const barbas = getWorksByCategory("Barbas");
+
+  return (
+    <div>
+      {works.map((work) => (
+        <img key={work.id} src={work.src} alt={work.alt} />
+      ))}
+    </div>
+  );
+};
 // CSS para animaciones
 const spinKeyframes = `
   @keyframes spin {
@@ -45,18 +60,14 @@ const Trabajos: React.FC = () => {
   const [images, setImages] = useState<PortfolioImage[]>([]);
 
   useEffect(() => {
-    // Simular carga de datos
-    const loadPortfolio = async () => {
-      try {
-        setImages(portfolioData as PortfolioImage[]);
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Error loading portfolio:", error);
-        setIsLoading(false);
+    const handleMessage = (event: { data: { type: string; data: any } }) => {
+      if (event.data.type === "PORTFOLIO_UPDATED") {
+        setWorks(event.data.data);
       }
     };
 
-    loadPortfolio();
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
   }, []);
 
   // Obtener categorías únicas
@@ -357,3 +368,6 @@ const ImageModal: React.FC<ImageModalProps> = ({ image, onClose }) => {
 };
 
 export default Trabajos;
+function setWorks(data: any) {
+  throw new Error("Function not implemented.");
+}

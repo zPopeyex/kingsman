@@ -1,7 +1,23 @@
 // web/apps/src/components/admin/PortfolioManager.tsx
 import React, { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, Upload, Save, X } from "lucide-react";
-import type { PortfolioImage } from "../../utils/imageUtils";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Upload,
+  Save,
+  X,
+  Download,
+  AlertCircle,
+} from "lucide-react";
+import type { PortfolioImage, PortfolioCategory } from "../../types/portfolio";
+import {
+  loadPortfolioFromFirebase,
+  savePortfolioToFirebase,
+  uploadImageToFirebase,
+} from "@/services/firebase-portfolio";
+// TODO: Usar el servicio global cuando esté implementado
+// import { usePortfolio } from '../services/portfolioService';
 
 interface PortfolioManagerProps {
   // Props para integración con tu sistema de datos
@@ -12,6 +28,9 @@ const PortfolioManager: React.FC<PortfolioManagerProps> = () => {
   const [isAddingWork, setIsAddingWork] = useState(false);
   const [editingWork, setEditingWork] = useState<PortfolioImage | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
 
   // Cargar trabajos existentes
   useEffect(() => {
@@ -20,64 +39,169 @@ const PortfolioManager: React.FC<PortfolioManagerProps> = () => {
 
   const loadPortfolioWorks = async () => {
     try {
-      // Aquí conectarías con tu backend/base de datos
-      // Por ahora simulamos con el JSON actual
-      const response = await fetch("/api/portfolio-works");
-      const data = await response.json();
+      setLoading(true);
+
+      // TODO: Uncomment to use Firebase
+      // import { loadPortfolioFromFirebase } from '../services/firebase-portfolio';
+      const data = await loadPortfolioFromFirebase();
       setWorks(data);
+
+      // Fallback: cargar desde el archivo JSON local
+      const response = await fetch("/src/data/portafolio.json");
+      if (response.ok) {
+        const data = await response.json();
+        setWorks(Array.isArray(data) ? data : []);
+      } else {
+        console.warn("No se pudo cargar portafolio.json");
+        setWorks([]);
+      }
     } catch (error) {
       console.error("Error loading portfolio works:", error);
-      // Fallback con datos locales
-      import("../../data/portafolio.json").then((data) => {
-        setWorks(data.default as PortfolioImage[]);
-      });
+      // Fallback a datos vacíos
+      setWorks([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Función para guardar cambios con Firebase + fallback
+  const saveAllChanges = async () => {
+    setSaving(true);
+
+    try {
+      // TODO: Uncomment to use Firebase
+      // import { savePortfolioToFirebase } from '../services/firebase-portfolio';
+      try {
+        await savePortfolioToFirebase(works);
+        setHasChanges(false);
+        alert("Cambios guardados en Firebase exitosamente!");
+        return;
+      } catch (firebaseError) {
+        console.log("Firebase falló, usando fallback:", firebaseError);
+        // Continúa con el fallback
+      }
+
+      // Guardar en localStorage como backup
+      try {
+        localStorage.setItem(
+          "kingsman_portfolio_backup",
+          JSON.stringify(works)
+        );
+        console.log("Portfolio guardado en localStorage como backup");
+      } catch (error) {
+        console.warn("No se pudo guardar en localStorage:", error);
+      }
+
+      // Fallback: descargar archivo actualizado
+      const dataStr = JSON.stringify(works, null, 2);
+      const dataBlob = new Blob([dataStr], { type: "application/json" });
+      const url = URL.createObjectURL(dataBlob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "portafolio.generated.json";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      setHasChanges(false);
+      alert(
+        "Archivo descargado. Reemplaza manualmente src/data/portafolio.json y haz commit."
+      );
+
+      // TODO: Notificar al servicio global de portfolio
+      // portfolioService.updateWorks(works);
+    } catch (error) {
+      console.error("Error al guardar:", error);
+      alert("Error al guardar los cambios");
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleImageUpload = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      // Crear FormData para upload
-      const formData = new FormData();
-      formData.append("image", file);
-      formData.append("folder", "portafolio");
+    return new Promise(async (resolve, reject) => {
+      try {
+        // TODO: Uncomment to use Firebase Storage
+        // import { uploadImageToFirebase } from '../services/firebase-portfolio';
+        const downloadURL = await uploadImageToFirebase(
+          file,
+          `work-${Date.now()}`
+        );
+        resolve(downloadURL);
+        return;
 
-      // Aquí harías el upload real a tu servidor/cloud storage
-      // Por ahora simulamos
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        setPreviewImage(result);
+        // Generar URL limpia para el archivo
+        const cleanFileName = file.name
+          .replace(/\s+/g, "-")
+          .toLowerCase()
+          .replace(/[^a-z0-9.-]/g, "");
 
-        // Simular URL del servidor
-        const fakeServerUrl = `/assets/images/portafolio/${file.name}`;
+        const fakeServerUrl = `/assets/images/portafolio/${cleanFileName}`;
+
+        console.log("Imagen procesada:", {
+          fileName: file.name,
+          cleanFileName,
+          size: file.size,
+          type: file.type,
+          url: fakeServerUrl,
+        });
+
         resolve(fakeServerUrl);
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
+      } catch (error) {
+        console.error("Error en handleImageUpload:", error);
+        reject(error);
+      }
     });
   };
 
   const saveWork = async (workData: Partial<PortfolioImage>) => {
     try {
-      const method = workData.id ? "PUT" : "POST";
-      const url = workData.id
-        ? `/api/portfolio-works/${workData.id}`
-        : "/api/portfolio-works";
+      if (workData.id && works.find((w) => w.id === workData.id)) {
+        // Actualizar trabajo existente
+        setWorks((prev) =>
+          prev.map((work) =>
+            work.id === workData.id
+              ? ({ ...work, ...workData } as PortfolioImage)
+              : work
+          )
+        );
+      } else {
+        // Agregar nuevo trabajo
+        const newWork: PortfolioImage = {
+          id: `work-${Date.now()}`,
+          title: workData.title || "",
+          caption: workData.caption || "",
+          category: workData.category || "Cortes",
+          src: workData.src || "",
+          alt:
+            workData.alt ||
+            `${workData.title} - ${workData.category} en barbería Kingsman`,
+          width: workData.width || 1600,
+          height: workData.height || 1600,
+          priority: workData.priority || false,
+          palette: workData.palette || ["#0B0B0B", "#D4AF37", "#1A1A1A"],
+        };
+        setWorks((prev) => [...prev, newWork]);
 
-      const response = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(workData),
-      });
-
-      if (response.ok) {
-        await loadPortfolioWorks(); // Recargar lista
-        setIsAddingWork(false);
-        setEditingWork(null);
-        setPreviewImage(null);
+        console.log("Nuevo trabajo agregado:", newWork);
       }
+
+      setHasChanges(true);
+      setIsAddingWork(false);
+      setEditingWork(null);
+      setPreviewImage(null);
+
+      // Mostrar confirmación
+      alert(
+        workData.id
+          ? "Trabajo actualizado correctamente"
+          : "Trabajo agregado correctamente"
+      );
     } catch (error) {
       console.error("Error saving work:", error);
+      alert("Error al guardar el trabajo");
     }
   };
 
@@ -85,12 +209,24 @@ const PortfolioManager: React.FC<PortfolioManagerProps> = () => {
     if (!confirm("¿Estás seguro de eliminar este trabajo?")) return;
 
     try {
-      await fetch(`/api/portfolio-works/${workId}`, { method: "DELETE" });
-      await loadPortfolioWorks();
+      setWorks((prev) => prev.filter((work) => work.id !== workId));
+      setHasChanges(true);
     } catch (error) {
       console.error("Error deleting work:", error);
+      alert("Error al eliminar el trabajo");
     }
   };
+
+  if (loading) {
+    return (
+      <div className="bg-[#0B0B0B] min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-[#C7C7C7]">Cargando portfolio...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#0B0B0B] min-h-screen p-6">
@@ -105,14 +241,47 @@ const PortfolioManager: React.FC<PortfolioManagerProps> = () => {
               Administra los trabajos que se muestran en la galería
             </p>
           </div>
-          <button
-            onClick={() => setIsAddingWork(true)}
-            className="flex items-center space-x-2 bg-[#D4AF37] text-[#0B0B0B] px-6 py-3 rounded-xl font-semibold hover:bg-[#F4D061] transition-colors duration-200"
-          >
-            <Plus className="w-5 h-5" />
-            <span>Agregar Trabajo</span>
-          </button>
+          <div className="flex gap-3">
+            {hasChanges && (
+              <button
+                onClick={saveAllChanges}
+                disabled={saving}
+                className="flex items-center space-x-2 bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              >
+                {saving ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Guardando...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-5 h-5" />
+                    <span>Guardar Cambios</span>
+                  </>
+                )}
+              </button>
+            )}
+            <button
+              onClick={() => setIsAddingWork(true)}
+              className="flex items-center space-x-2 bg-[#D4AF37] text-[#0B0B0B] px-6 py-3 rounded-xl font-semibold hover:bg-[#F4D061] transition-colors duration-200"
+            >
+              <Plus className="w-5 h-5" />
+              <span>Agregar Trabajo</span>
+            </button>
+          </div>
         </div>
+
+        {/* Alerta de cambios sin guardar */}
+        {hasChanges && (
+          <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 mb-6">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-yellow-500" />
+              <p className="text-yellow-200">
+                Tienes cambios sin guardar. No olvides guardar antes de salir.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Grid de trabajos */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
@@ -125,6 +294,27 @@ const PortfolioManager: React.FC<PortfolioManagerProps> = () => {
             />
           ))}
         </div>
+
+        {/* Estado vacío */}
+        {works.length === 0 && (
+          <div className="text-center py-16">
+            <div className="w-16 h-16 bg-[#D4AF37]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Plus className="w-8 h-8 text-[#D4AF37]" />
+            </div>
+            <h3 className="text-xl font-semibold text-white mb-2">
+              No hay trabajos en el portfolio
+            </h3>
+            <p className="text-[#C7C7C7] mb-6">
+              Comienza agregando tu primer trabajo para mostrar tu portafolio
+            </p>
+            <button
+              onClick={() => setIsAddingWork(true)}
+              className="bg-[#D4AF37] text-[#0B0B0B] px-6 py-3 rounded-xl font-semibold hover:bg-[#F4D061] transition-colors duration-200"
+            >
+              Agregar Primer Trabajo
+            </button>
+          </div>
+        )}
 
         {/* Modal para agregar/editar trabajo */}
         {(isAddingWork || editingWork) && (
@@ -200,25 +390,39 @@ const WorkCard: React.FC<WorkCardProps> = ({ work, onEdit, onDelete }) => {
             {work.category}
           </span>
         </div>
+
+        {/* Badge de prioridad */}
+        {work.priority && (
+          <div className="absolute top-3 right-3">
+            <span className="px-2 py-1 bg-green-500 text-white text-xs font-medium rounded-full">
+              Prioridad
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Información */}
       <div className="p-4">
         <h3 className="text-lg font-semibold text-white mb-1">{work.title}</h3>
-        <p className="text-[#C7C7C7] text-sm mb-3">{work.caption}</p>
+        <p className="text-[#C7C7C7] text-sm mb-3 line-clamp-2">
+          {work.caption}
+        </p>
 
         {/* Metadatos */}
         <div className="flex items-center justify-between text-xs text-[#C7C7C7]">
           <span>
             {work.width} × {work.height}
           </span>
-          <span
-            className={`px-2 py-1 rounded ${
-              work.priority ? "bg-[#D4AF37]/20 text-[#D4AF37]" : "bg-[#1A1A1A]"
-            }`}
-          >
-            {work.priority ? "Prioridad" : "Normal"}
-          </span>
+          <div className="flex gap-2">
+            {work.palette.map((color, index) => (
+              <div
+                key={index}
+                className="w-4 h-4 rounded-full border border-white/20"
+                style={{ backgroundColor: color }}
+                title={color}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -239,7 +443,7 @@ const WorkFormModal: React.FC<WorkFormModalProps> = ({
   onSave,
   onClose,
   onImageUpload,
-  previewImage,
+  previewImage: externalPreviewImage,
 }) => {
   const [formData, setFormData] = useState({
     title: work?.title || "",
@@ -250,11 +454,18 @@ const WorkFormModal: React.FC<WorkFormModalProps> = ({
     src: work?.src || "",
     width: work?.width || 1600,
     height: work?.height || 1600,
+    palette: work?.palette || ["#0B0B0B", "#D4AF37", "#1A1A1A"],
   });
 
-  const categories = [
+  const [localPreviewImage, setLocalPreviewImage] = useState<string | null>(
+    externalPreviewImage
+  );
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  const categories: PortfolioCategory[] = [
     "Cortes",
     "Barbas",
+    "Tattos",
     "Afeitados",
     "Servicios Premium",
     "Cortes Especializados",
@@ -265,23 +476,69 @@ const WorkFormModal: React.FC<WorkFormModalProps> = ({
     const file = e.target.files?.[0];
     if (file) {
       try {
+        console.log("Archivo seleccionado:", file.name, file.type, file.size);
+
+        // Validar tipo de archivo
+        if (!file.type.startsWith("image/")) {
+          alert("Por favor selecciona un archivo de imagen válido");
+          return;
+        }
+
+        // Validar tamaño (máximo 10MB)
+        if (file.size > 10 * 1024 * 1024) {
+          alert("La imagen es demasiado grande. Máximo 10MB");
+          return;
+        }
+
+        // Crear preview local inmediatamente
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const result = e.target?.result as string;
+          setLocalPreviewImage(result);
+        };
+        reader.readAsDataURL(file);
+
         const imageUrl = await onImageUpload(file);
-        setFormData((prev) => ({ ...prev, src: imageUrl }));
+        console.log("URL generada:", imageUrl);
+
+        setFormData((prev) => ({
+          ...prev,
+          src: imageUrl,
+          alt:
+            prev.alt || `${prev.title} - ${prev.category} en barbería Kingsman`,
+        }));
       } catch (error) {
         console.error("Error uploading image:", error);
+        alert("Error al procesar la imagen");
       }
     }
+  };
+
+  const updatePaletteColor = (index: number, color: string) => {
+    const newPalette = [...formData.palette];
+    newPalette[index] = color;
+    setFormData((prev) => ({ ...prev, palette: newPalette }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Verificar si hay imagen (ya sea en formData.src o en localPreviewImage)
+    if (!formData.src && !localPreviewImage) {
+      alert("Por favor selecciona una imagen");
+      return;
+    }
+
+    // Si tenemos preview local pero no URL final, usar el preview
+    const finalSrc = formData.src || localPreviewImage || "";
+
     const workData: Partial<PortfolioImage> = {
       ...formData,
+      src: finalSrc,
       id: work?.id || `work-${Date.now()}`,
-      palette: work?.palette || ["#0B0B0B", "#D4AF37", "#1A1A1A"],
     };
 
+    console.log("Guardando trabajo con datos:", workData);
     onSave(workData);
   };
 
@@ -305,25 +562,36 @@ const WorkFormModal: React.FC<WorkFormModalProps> = ({
           {/* Upload de imagen */}
           <div>
             <label className="block text-sm font-medium text-[#C7C7C7] mb-2">
-              Imagen
+              Imagen *
             </label>
             <div className="border-2 border-dashed border-[#D4AF37]/30 rounded-xl p-6 text-center">
-              {previewImage || formData.src ? (
+              {localPreviewImage || formData.src ? (
                 <div className="relative">
                   <img
-                    src={previewImage || formData.src}
+                    src={localPreviewImage || formData.src}
                     alt="Preview"
-                    className="max-w-full h-48 object-cover mx-auto rounded-lg"
+                    className="max-w-full h-48 object-cover mx-auto rounded-lg border border-[#D4AF37]/20"
+                    onError={(e) => {
+                      console.error("Error cargando imagen preview:", e);
+                      setLocalPreviewImage(null);
+                    }}
                   />
-                  <button
-                    type="button"
-                    onClick={() =>
-                      document.getElementById("imageInput")?.click()
-                    }
-                    className="mt-3 text-sm text-[#D4AF37] hover:text-[#F4D061]"
-                  >
-                    Cambiar imagen
-                  </button>
+                  <div className="mt-3 space-y-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        document.getElementById("imageInput")?.click()
+                      }
+                      className="text-sm text-[#D4AF37] hover:text-[#F4D061] block mx-auto"
+                    >
+                      Cambiar imagen
+                    </button>
+                    {formData.src && (
+                      <p className="text-xs text-[#C7C7C7] break-all">
+                        URL: {formData.src}
+                      </p>
+                    )}
+                  </div>
                 </div>
               ) : (
                 <div>
@@ -340,6 +608,9 @@ const WorkFormModal: React.FC<WorkFormModalProps> = ({
                   >
                     Seleccionar archivo
                   </button>
+                  <p className="text-xs text-[#C7C7C7] mt-2">
+                    Formatos: JPG, PNG, WebP | Máximo: 10MB
+                  </p>
                 </div>
               )}
               <input
@@ -356,7 +627,7 @@ const WorkFormModal: React.FC<WorkFormModalProps> = ({
             {/* Título */}
             <div>
               <label className="block text-sm font-medium text-[#C7C7C7] mb-2">
-                Título
+                Título *
               </label>
               <input
                 type="text"
@@ -372,7 +643,7 @@ const WorkFormModal: React.FC<WorkFormModalProps> = ({
             {/* Categoría */}
             <div>
               <label className="block text-sm font-medium text-[#C7C7C7] mb-2">
-                Categoría
+                Categoría *
               </label>
               <select
                 value={formData.category}
@@ -380,6 +651,7 @@ const WorkFormModal: React.FC<WorkFormModalProps> = ({
                   setFormData((prev) => ({ ...prev, category: e.target.value }))
                 }
                 className="w-full bg-[#0B0B0B] border border-[#D4AF37]/20 rounded-lg px-3 py-2 text-white focus:border-[#D4AF37] focus:outline-none"
+                required
               >
                 {categories.map((cat) => (
                   <option key={cat} value={cat}>
@@ -402,6 +674,7 @@ const WorkFormModal: React.FC<WorkFormModalProps> = ({
               }
               rows={3}
               className="w-full bg-[#0B0B0B] border border-[#D4AF37]/20 rounded-lg px-3 py-2 text-white focus:border-[#D4AF37] focus:outline-none"
+              placeholder="Descripción breve del trabajo realizado..."
             />
           </div>
 
@@ -433,10 +706,11 @@ const WorkFormModal: React.FC<WorkFormModalProps> = ({
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
-                    width: parseInt(e.target.value),
+                    width: parseInt(e.target.value) || 1600,
                   }))
                 }
                 className="w-full bg-[#0B0B0B] border border-[#D4AF37]/20 rounded-lg px-3 py-2 text-white focus:border-[#D4AF37] focus:outline-none"
+                min="100"
               />
             </div>
 
@@ -450,10 +724,11 @@ const WorkFormModal: React.FC<WorkFormModalProps> = ({
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
-                    height: parseInt(e.target.value),
+                    height: parseInt(e.target.value) || 1600,
                   }))
                 }
                 className="w-full bg-[#0B0B0B] border border-[#D4AF37]/20 rounded-lg px-3 py-2 text-white focus:border-[#D4AF37] focus:outline-none"
+                min="100"
               />
             </div>
 
@@ -477,6 +752,31 @@ const WorkFormModal: React.FC<WorkFormModalProps> = ({
             </div>
           </div>
 
+          {/* Paleta de colores */}
+          <div>
+            <label className="block text-sm font-medium text-[#C7C7C7] mb-2">
+              Paleta de colores
+            </label>
+            <div className="flex gap-2">
+              {formData.palette.map((color, index) => (
+                <div key={index} className="flex-1">
+                  <input
+                    type="color"
+                    value={color}
+                    onChange={(e) => updatePaletteColor(index, e.target.value)}
+                    className="w-full h-10 rounded-lg border border-[#D4AF37]/20 bg-[#0B0B0B]"
+                  />
+                  <input
+                    type="text"
+                    value={color}
+                    onChange={(e) => updatePaletteColor(index, e.target.value)}
+                    className="w-full mt-1 text-xs bg-[#0B0B0B] border border-[#D4AF37]/20 rounded px-2 py-1 text-white focus:border-[#D4AF37] focus:outline-none"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Botones */}
           <div className="flex items-center justify-end space-x-3 pt-6 border-t border-[#D4AF37]/20">
             <button
@@ -488,7 +788,8 @@ const WorkFormModal: React.FC<WorkFormModalProps> = ({
             </button>
             <button
               type="submit"
-              className="flex items-center space-x-2 bg-[#D4AF37] text-[#0B0B0B] px-6 py-2 rounded-lg font-semibold hover:bg-[#F4D061] transition-colors duration-200"
+              disabled={uploadingImage}
+              className="flex items-center space-x-2 bg-[#D4AF37] text-[#0B0B0B] px-6 py-2 rounded-lg font-semibold hover:bg-[#F4D061] disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
             >
               <Save className="w-4 h-4" />
               <span>{work ? "Actualizar" : "Guardar"}</span>
