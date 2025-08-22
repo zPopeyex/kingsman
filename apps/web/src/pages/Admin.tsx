@@ -6,11 +6,17 @@ import ScheduleEditor from "@/components/admin/ScheduleEditor";
 import AppointmentsTable from "@/components/admin/AppointmentsTable";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import BarberManagement from "@/components/admin/BarberManagement";
+import PortfolioManager from "@/components/admin/PortfolioManager";
 import { Timestamp } from "firebase/firestore";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
-type TabType = "dashboard" | "appointments" | "schedules" | "barbers";
+type TabType =
+  | "dashboard"
+  | "appointments"
+  | "schedules"
+  | "barbers"
+  | "portafolio";
 
 /** ==== Helpers para fechas (útiles si en tablas llegan Timestamps) ==== */
 export const toDateSafe = (v: any): Date | null => {
@@ -100,6 +106,7 @@ export default function Admin() {
       { id: "appointments" as TabType, label: "Citas", icon: "📅" },
       { id: "schedules" as TabType, label: "Horarios", icon: "⏰" },
       { id: "barbers" as TabType, label: "Barberos", icon: "✂️" },
+      { id: "portafolio" as TabType, label: "PortfolioManager", icon: "💼" },
     ],
     []
   );
@@ -183,6 +190,7 @@ export default function Admin() {
           {activeTab === "schedules" && <ScheduleEditor />}
 
           {activeTab === "barbers" && <BarberManagement />}
+          {activeTab === "portafolio" && <PortfolioManager />}
         </main>
       </AdminErrorBoundary>
     </div>

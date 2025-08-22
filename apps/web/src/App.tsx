@@ -13,7 +13,7 @@ import Profile from "@/pages/Profile";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import TermsOfService from "@/pages/TermsOfService";
-
+import PortfolioManager from "./components/admin/PortfolioManager";
 import TestBookingUtils from "./pages/TestBookingUtils";
 import BookingSuccess from "@/pages/BookingSuccess";
 
@@ -38,11 +38,11 @@ export default function App() {
         />
         <Route path="privacy-policy" element={<PrivacyPolicy />} />
         <Route path="terms-of-service" element={<TermsOfService />} />
-
         <Route path="/test-booking" element={<TestBookingUtils />} />
         <Route path="/citas" element={<Booking />} />
         <Route path="/booking/success" element={<BookingSuccess />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/PortfolioManager" element={<PortfolioManager />} />
       </Route>
     </Routes>
   );
